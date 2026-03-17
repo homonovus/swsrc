@@ -1,0 +1,19 @@
+root = true
+
+[*]
+indent_style = tab
+insert_final_newline = true
+max_line_length = unset
+quote_style = double
+trim_trailing_whitespace = true
+
+# https://github.com/CppCXY/EmmyLuaCodeStyle/blob/master/lua.template.editorconfig
+[*.lua]
+align_continuous_assign_statement = false
+align_continuous_inline_comment = false
+space_around_table_field_list = false
+space_before_function_call_single_arg = false
+table_separator_style = comma
+trailing_table_separator = smart
+continuation_indent.before_block = 0
+line_space_after_function_statement = keep
