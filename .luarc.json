@@ -6,7 +6,7 @@
 		"include": "dofile"
 	},
 	"runtime.nonstandardSymbol": ["!", "!=", "&&", "||", "//", "/**/", "continue"],
-	"diagnostics.globals": ["BaseClass"],
+	"diagnostics.globals": ["BaseClass", "swsrc", "swcs"],
 	"diagnostics.disable": ["duplicate-set-field", "undefined-field", "missing-fields"],
 	"workspace.library": ["${addons}/garrysmod/module/library"],
 	"workspace.checkThirdParty": false
