@@ -227,7 +227,7 @@ function SWEP:Think_ProcessSecondaryAttack(tbl)
 	return true
 end
 
-function SWEP:Think_ProcessReloadAction(tbl)
+function SWEP:Think_ProcessReloadAction(_)
 	-- gameevent?
 
 	self:Reload()
@@ -294,14 +294,15 @@ hook.Add("PlayerTick", "swsrc.ProcessActivities", function(ply)
 	local wep = ply:GetActiveWeapon()
 
 	local tbl = wep:GetTable()
-	if not IsValid(wep) or not weapons.IsBasedOn(tbl.ClassName, "weapon_csbase") then return end
+	if not wep:IsValid() or not weapons.IsBasedOn(tbl.ClassName, "weapon_swsrc_base") then return end
+
 	if tbl.m_bProcessActivities then
 		tbl.ProcessActivities(wep, tbl)
 		tbl.m_bProcessActivities = false
 	end
 end)
 
-function SWEP:ProcessExtraActivities(tbl)
+function SWEP:ProcessExtraActivities(_)
 end
 
 function SWEP:ProcessActivities(tbl)
@@ -352,14 +353,14 @@ function SWEP:ProcessActivities(tbl)
 end
 
 function SWEP:GetMaxSpeed()
-	return tonumber(self:GetTable().WeaponData.MaxPlayerSpeed)
+	return tonumber(self:GetTable().GetWpnData(self).MaxPlayerSpeed)
 end
 
 function SWEP:Holster()
 	local selfTable = self:GetTable()
 	local owner = selfTable.GetPlayerOwner(self)
 
-	if not owner then return false end
+	if not owner then return true end
 
 	if owner:GetFOV() ~= owner:GetDefaultFOV() then
 		owner:SetFOV(0, 0.01)
@@ -372,9 +373,10 @@ function SWEP:Deploy()
 	local selfTable = self:GetTable()
 
 	local owner = selfTable.GetPlayerOwner(self)
-	if not owner then return end
+	if not owner then return true end
 
 	self:SetHoldType(selfTable.HoldType)
+	self:SetDeploySpeed(1)
 
 	selfTable.SetShotsFired(self, 0)
 	selfTable.SetResumeZoom(self, false)
@@ -383,6 +385,19 @@ function SWEP:Deploy()
 	if owner:GetFOV() ~= owner:GetDefaultFOV() then
 		owner:SetFOV(0, 0.01)
 	end
+
+	local vm = owner:GetViewModel(self:ViewModelIndex())
+	if vm:IsValid() then
+		vm:SetPlaybackRate(self:GetDeploySpeed())
+		selfTable.SetWeaponIdleTime(self, CurTime() + (self:SequenceDuration() * (1 / self:GetDeploySpeed())))
+
+		local oPrim = self:GetNextPrimaryFire()
+		local oSec = self:GetNextSecondaryFire()
+		self:SetNextPrimaryFire(oPrim < self:GetWeaponIdleTime() and self:GetWeaponIdleTime() or oPrim)
+		self:SetNextSecondaryFire(oSec < self:GetWeaponIdleTime() and self:GetWeaponIdleTime() or oSec)
+	end
+
+	return true
 end
 
 function SWEP:OnDrop()

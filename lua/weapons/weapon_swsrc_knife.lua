@@ -1,6 +1,6 @@
 AddCSLuaFile()
 
-SWEP.Base = "weapon_csbase"
+SWEP.Base = "weapon_swsrc_base"
 SWEP.Category = "Counter-Strike: Source"
 
 SWEP.PrintName = "Knife"
@@ -313,6 +313,9 @@ local function IsBSPModel(pEnt)
 	return false
 end
 
+local filter_IgnoreOwner = swcs and swcs.filter_IgnoreOwner or function(owner, _) return owner end
+local IGNORE_SHIELD = {"swcs_shield"}
+
 local phys_pushscale = GetConVar("phys_pushscale")
 function SWEP:SwingOrStab(bStab)
 	local selfTable = self:GetTable()
@@ -326,7 +329,7 @@ function SWEP:SwingOrStab(bStab)
 	local vecSrc = owner:GetShootPos()
 	local vecEnd = vecSrc + vForward * fRange
 
-	local filter = swcs and swcs.filter_IgnoreOwner(owner, {"swcs_shield"}) or owner
+	local filter = filter_IgnoreOwner(owner, IGNORE_SHIELD)
 
 	local tr = util.TraceLine({
 		start = vecSrc,
@@ -350,7 +353,7 @@ function SWEP:SwingOrStab(bStab)
 
 		if tr.Fraction < 1 then
 			local pHit = tr.Entity
-			if not pHit:IsValid() or IsBSPModel(pHit) then
+			if pHit and not pHit:IsValid() or IsBSPModel(pHit) then
 				FindHullIntersection(vecSrc, tr, VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX, filter)
 			end
 
@@ -392,7 +395,7 @@ function SWEP:SwingOrStab(bStab)
 			if bStab then
 				flDamage = 65
 
-				if pEntity:IsValid() and (pEntity:IsPlayer() or pEntity:IsNPC()) then
+				if pEntity and pEntity:IsValid() and (pEntity:IsPlayer() or pEntity:IsNPC()) then
 					local vTargetForawrd = pEntity:EyeAngles():Forward()
 
 					local vecLOS = pEntity:GetPos() - owner:GetPos()
@@ -431,7 +434,9 @@ function SWEP:SwingOrStab(bStab)
 			vecForce:Mul(flScale)
 			info:SetDamageForce(vecForce)
 
-			pEntity:DispatchTraceAttack(info, tr)
+			if pEntity and pEntity:IsValid() then
+				pEntity:DispatchTraceAttack(info, tr)
+			end
 
 			--SuppressHostEvents(owner)
 		end
