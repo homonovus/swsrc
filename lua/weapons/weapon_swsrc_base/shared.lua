@@ -112,6 +112,9 @@ hook.Add("Initialize", "swsrc.ammo", function()
 	})
 end)
 
+Primary_Mode = 0
+Secondary_Mode = 1
+
 SWEP.m_bDelayFire = true
 
 function SWEP:Initialize()
@@ -123,7 +126,11 @@ end
 function SWEP:GetWpnData()
 	local selfTable = self:GetTable()
 
-	return util.KeyValuesToTable(selfTable.WeaponData, false, true)
+	if not selfTable.CSWpnData then
+		selfTable.CSWpnData = util.KeyValuesToTable(selfTable.WeaponData, false, true)
+	end
+
+	return selfTable.CSWpnData
 end
 
 function SWEP:SetupDataTables()
@@ -133,11 +140,15 @@ function SWEP:SetupDataTables()
 
 	self:NetworkVar("Int", 0, "ShotsFired")
 	self:NetworkVar("Int", 1, "LastZoom")
+	self:NetworkVar("Int", 2, "WeaponMode")
 
 	self:NetworkVar("Float", 0, "DecreaseShotsFired")
 	self:NetworkVar("Float", 1, "WeaponIdleTime")
+	self:NetworkVar("Float", 2, "AccuracyPenalty")
 
 	self:SetDelayFire(true)
+	self:SetAccuracyPenalty(0)
+	self:SetWeaponMode(Primary_Mode)
 end
 
 function SWEP:GetPlayerOwner()
@@ -152,8 +163,16 @@ function SWEP:IsPistol(tbl)
 
 	return selfTable.GetWpnData(self).WeaponType == "Pistol"
 end
-function SWEP:IsAwp()
-	return false
+function SWEP:IsFullAuto(tbl)
+	local selfTable = tbl or self:GetTable()
+
+	return tobool(selfTable.GetWpnData(self).FullAuto)
+end
+
+function SWEP:PlayEmptySound(tbl)
+	local selfTable = tbl or self:GetTable()
+
+	self:EmitSound(selfTable.IsPistol(self, selfTable) and "Default.ClipEmpty_Pistol" or "Default.ClipEmpty_Rifle")
 end
 
 function SWEP:SetWeaponAnim(idealAct, flPlaybackRate)
@@ -209,9 +228,13 @@ function SWEP:IsUseable()
 end
 
 function SWEP:Think_ProcessPrimaryAttack(tbl)
-	if self:Clip1() == 0 or (self:GetMaxClip1() == -1 and self:Ammo1() <= 0) then
+	--[[if self:Clip1() == 0 or (self:GetMaxClip1() == -1 and self:Ammo1() <= 0) then
 		tbl.m_bFireOnEmpty = true
-	end
+	end--]]
+
+	if self:Clip1() == 0 and not tbl.m_bFireOnEmpty then return end
+
+	if tbl.GetShotsFired(self) > 0 and not tbl.IsFullAuto(self, tbl) then return end
 
 	-- gameevent?
 
@@ -233,7 +256,14 @@ function SWEP:Think_ProcessReloadAction(_)
 	self:Reload()
 end
 
+local weapon_accuracy_model = GetConVar("swsrc_weapon_accuracy_model")
 function SWEP:Think_ProcessIdleNoAction(tbl)
+	if weapon_accuracy_model:GetInt() == 2 then
+		if tbl.GetShotsFired(self) > 0 and (not tbl.IsFullAuto(self, tbl) or self:Clip1() == 0) then
+			tbl.SetShotsFired(self, 0)
+		end
+	end
+
 	if tbl.GetDelayFire(self) then
 		tbl.SetDelayFire(self, false)
 
@@ -244,7 +274,7 @@ function SWEP:Think_ProcessIdleNoAction(tbl)
 		tbl.SetDecreaseShotsFired(self, CurTime() + 0.4)
 	end
 
-	tbl.m_bFireOnEmpty = false
+	tbl.m_bFireOnEmpty = true
 
 	if tbl.IsPistol(self, tbl) then
 		tbl.SetShotsFired(self, 0)
@@ -274,6 +304,8 @@ function SWEP:Think()
 
 	local owner = selfTable.GetPlayerOwner(self)
 	if not owner then return end
+
+	selfTable.UpdateAccuracyPenalty(self, selfTable)
 
 	if selfTable.GetInReload(self) and self:GetNextPrimaryFire() <= CurTime() then
 		local clip1 = self:Clip1()
@@ -352,8 +384,44 @@ function SWEP:ProcessActivities(tbl)
 	selfTable.m_bProcessingActivities = false
 end
 
+function SWEP:GetInaccuracy()
+	local selfTable = self:GetTable()
+
+	local owner = selfTable.GetPlayerOwner(self)
+	if not owner then return 0 end
+
+	local wdat = selfTable.GetWpnData(self)
+
+	local fMaxSpeed = selfTable.GetMaxSpeed(self)
+
+	local moveKey = "InaccuracyMove"
+	if selfTable.GetWeaponMode(self) == Secondary_Mode then
+		moveKey = moveKey .. "Alt"
+	end
+
+	return selfTable.GetAccuracyPenalty(self) +
+			math.Remap(owner:GetVelocity():Length2D(),
+				fMaxSpeed * 0.34, -- CS_PLAYER_SPEED_DUCK_MODIFIER
+				fMaxSpeed * 0.95,
+				0.0, tonumber(wdat[moveKey]))
+end
+
+function SWEP:GetSpread()
+	if weapon_accuracy_model:GetInt() == 1 then
+		return 0
+	end
+
+	local selfTable = self:GetTable()
+	local spreadKey = "Spread"
+	if selfTable.GetWeaponMode(self) == Secondary_Mode then
+		spreadKey = spreadKey .. "Alt"
+	end
+
+	return tonumber(selfTable.GetWpnData(self)[spreadKey])
+end
+
 function SWEP:GetMaxSpeed()
-	return tonumber(self:GetTable().GetWpnData(self).MaxPlayerSpeed)
+	return tonumber(self:GetTable().GetWpnData(self).MaxPlayerSpeed) / 320
 end
 
 function SWEP:Holster()
@@ -376,7 +444,9 @@ function SWEP:Deploy()
 	if not owner then return true end
 
 	self:SetHoldType(selfTable.HoldType)
-	self:SetDeploySpeed(1)
+	self:SetDeploySpeed(1) -- FIXME: cvar
+
+	selfTable.SetDecreaseShotsFired(self, CurTime())
 
 	selfTable.SetShotsFired(self, 0)
 	selfTable.SetResumeZoom(self, false)
@@ -385,6 +455,8 @@ function SWEP:Deploy()
 	if owner:GetFOV() ~= owner:GetDefaultFOV() then
 		owner:SetFOV(0, 0.01)
 	end
+
+	selfTable.SetAccuracyPenalty(self, 0)
 
 	local vm = owner:GetViewModel(self:ViewModelIndex())
 	if vm:IsValid() then
@@ -404,4 +476,56 @@ function SWEP:OnDrop()
 	local selfTable = self:GetTable()
 
 	selfTable.SetInReload(self, false)
+end
+
+
+function SWEP:UpdateAccuracyPenalty(tbl)
+	local selfTable = tbl or self:GetTable()
+
+	local owner = selfTable.GetPlayerOwner(self)
+	if not owner then return end
+
+	local wdat = selfTable.GetWpnData(self)
+
+	local fNewPenalty = 0
+
+	local isAlt = selfTable.GetWeaponMode(self) == Secondary_Mode
+
+	local standKey = "InaccuracyStand"
+	local ladderKey = "InaccuracyLadder"
+	local duckKey = "InaccuracyCrouch"
+	if isAlt then
+		standKey = standKey .. "Alt"
+		ladderKey = ladderKey .. "Alt"
+		duckKey = duckKey .. "Alt"
+	end
+
+	if owner:GetMoveType() == MOVETYPE_LADDER then
+		fNewPenalty = fNewPenalty + (tonumber(wdat[standKey]) or 0) + (tonumber(wdat[ladderKey]) or 0)
+	elseif bit.band(owner:GetFlags(), FL_DUCKING) ~= 0 then
+		fNewPenalty = fNewPenalty + (tonumber(wdat[duckKey]) or 0)
+	end
+
+	if selfTable.GetInReload(self) then
+		fNewPenalty = fNewPenalty + (tonumber(wdat.InaccuracyReload) or 0)
+	end
+
+	if fNewPenalty > selfTable.GetAccuracyPenalty(self) then
+		selfTable.SetAccuracyPenalty(self, fNewPenalty)
+	else
+		local fDecayFactor = 0
+
+		if owner:GetMoveType() == MOVETYPE_LADDER then
+			fDecayFactor = math.log(10) / (tonumber(wdat.RecoveryTimeStand) or 1)
+		elseif not owner:IsOnGround() then
+			fDecayFactor = math.log(10) / ((tonumber(wdat.RecoveryTimeCrouch) or 1) * 3)
+		elseif bit.band(owner:GetFlags(), FL_DUCKING) ~= 0 then
+			fDecayFactor = math.log(10) / (tonumber(wdat.RecoveryTimeCrouch) or 1)
+		else
+			fDecayFactor = math.log(10) / (tonumber(wdat.RecoveryTimeStand) or 1)
+		end
+
+		selfTable.SetAccuracyPenalty(self,
+			Lerp(math.exp(engine.TickInterval() * -fDecayFactor), fNewPenalty, selfTable.GetAccuracyPenalty(self)))
+	end
 end

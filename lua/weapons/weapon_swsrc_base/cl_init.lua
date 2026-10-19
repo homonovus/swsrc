@@ -1,5 +1,6 @@
 include("shared.lua")
 
+local xhair_enabled = GetConVar("swsrc_crosshair")
 local cl_dynamiccrosshair = GetConVar("swsrc_dynamiccrosshair")
 local cl_crosshairscale = GetConVar("swsrc_crosshairscale")
 local cl_scalecrosshair = GetConVar("swsrc_scalecrosshair")
@@ -17,6 +18,8 @@ local SWITCH_color = {
 
 SWEP.m_iAmmoLastCheck = 0
 function SWEP:DoDrawCrosshair(x, y)
+	if not xhair_enabled:GetBool() then return end
+
 	local selfTable = self:GetTable()
 
 	local owner = self:GetPlayerOwner()
@@ -125,4 +128,112 @@ function SWEP:DoDrawCrosshair(x, y)
 	drawFunc(x + iHalfScreenWidth, y + iBottom, iHalfScreenWidth + iBarThickness, iFarBottom)
 
 	return true
+end
+
+local bob_enabled = GetConVar("swsrc_use_headbob")
+-- shared with swcs lol cope
+local cl_bobcycle = CreateConVar("cl_bobcycle", "0.98", FCVAR_ARCHIVE, "the frequency at which the viewmodel bobs.", 0.1,
+	2.0)
+local cl_bob = CreateConVar("cl_bob", "0.002")
+local cl_bobup = CreateConVar("cl_bobup", "0.5")
+
+function SWEP:CalcViewmodelBob()
+	local lateralBob, verticalBob = 0, 0
+
+	local bobtime, lastbobtime, lastspeed, cycle = 0, 0, 0, 0
+
+	local owner = self:GetPlayerOwner()
+
+	local _bobup = cl_bobup:GetFloat()
+	local _bobcycle = cl_bobcycle:GetFloat()
+	if not owner or _bobcycle <= 0 or _bobup <= 0 or _bobup >= 1 then return lateralBob, verticalBob end
+
+	local speed = owner:GetVelocity():Length2D()
+	local flmaxSpeedDelta = math.max(0, (CurTime() - lastbobtime) * 320)
+
+	speed = math.Clamp(speed, lastspeed - flmaxSpeedDelta, lastspeed + flmaxSpeedDelta)
+	speed = math.Clamp(speed, -320, 320)
+
+	lastspeed = speed
+
+	local bob_offset = math.Remap(speed, 0, 320, 0, 1)
+
+	bobtime = bobtime + (CurTime() - lastbobtime) * bob_offset
+	lastbobtime = CurTime()
+
+	--
+	cycle = lastbobtime - math.floor(bobtime / _bobcycle) * _bobcycle
+	cycle = cycle / _bobcycle
+
+	if cycle < _bobup then
+		cycle = math.pi * cycle / _bobup
+	else
+		cycle = math.pi + math.pi * (cycle - _bobup) / (1 - _bobup)
+	end
+
+	verticalBob = speed * 0.005
+	verticalBob = verticalBob * 0.3 + verticalBob * 0.7 * math.sin(cycle)
+
+	verticalBob = math.Clamp(verticalBob, -7, 4)
+
+	cycle = bobtime - math.floor(bobtime / _bobcycle * 2) * _bobcycle * 2
+	cycle = cycle / _bobcycle * 2
+
+	if cycle < _bobup then
+		cycle = math.pi * cycle / _bobup
+	else
+		cycle = math.pi + math.pi * (cycle - _bobup) / (1 - _bobup)
+	end
+
+	lateralBob = speed * 0.005
+	lateralBob = lateralBob * 0.3 + lateralBob * 0.7 * math.sin(cycle)
+	lateralBob = math.Clamp(lateralBob, -7, 4)
+
+	return lateralBob, verticalBob
+end
+
+local VectorMA
+do
+	local VECTOR = FindMetaTable("Vector")
+	---@diagnostic disable: need-check-nil
+	local VUnpack = VECTOR.Unpack
+	local VSetUnpacked = VECTOR.SetUnpacked
+	---@diagnostic enable: need-check-nil
+
+	VectorMA = function(start, scale, dir, dest)
+		local startX, startY, startZ = VUnpack(start)
+		local dirX, dirY, dirZ = VUnpack(dir)
+
+		VSetUnpacked(dest,
+			startX + scale * dirX,
+			startY + scale * dirY,
+			startZ + scale * dirZ
+		)
+	end
+end
+
+function SWEP:AddViewmodelBob(vm, pos, ang)
+	local forward = ang:Forward()
+	--local right = ang:Right()
+
+	local lateralBob, verticalBob = self:CalcViewmodelBob()
+
+	VectorMA(pos, verticalBob * 0.4, forward, pos)
+
+	pos.z = pos.z + verticalBob * 0.1
+
+	ang.r = ang.r + verticalBob * 0.5
+	ang.p = ang.p - verticalBob * 0.4
+
+	ang.y = ang.y - lateralBob * 0.3
+
+	-- VectorMA(pos, lateralBob * 0.2, right, pos)
+end
+
+function SWEP:CalcViewModelView(vm, _, _, pos, ang)
+	if bob_enabled:GetBool() then
+		self:AddViewmodelBob(vm, pos, ang)
+	end
+
+	return pos, ang
 end
