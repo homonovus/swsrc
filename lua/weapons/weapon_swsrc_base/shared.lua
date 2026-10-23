@@ -140,6 +140,45 @@ local s_weaponTypeInfo = {
 	{WEAPONTYPE_GRENADE,       "Grenade"},
 }
 
+ITEM_FLAG_SELECTONEMPTY = bit.lshift(1, 0)
+ITEM_FLAG_NOAUTORELOAD = bit.lshift(1, 1)
+ITEM_FLAG_NOAUTOSWITCHEMPTY = bit.lshift(1, 2)
+ITEM_FLAG_LIMITINWORLD = bit.lshift(1, 3)
+ITEM_FLAG_EXHAUSTIBLE = bit.lshift(1, 4) -- A player can totally exhaust their ammo supply and lose this weapon
+ITEM_FLAG_DOHITLOCATIONDMG = bit.lshift(1, 5) -- This weapon take hit location into account when applying damage
+ITEM_FLAG_NOAMMOPICKUPS = bit.lshift(1, 6) -- Don't draw ammo pickup sprites/sounds when ammo is received
+ITEM_FLAG_NOITEMPICKUP = bit.lshift(1, 7) -- Don't draw weapon pickup when this weapon is picked up by the player
+
+local g_ItemFlags = {
+	{"ITEM_FLAG_SELECTONEMPTY",     ITEM_FLAG_SELECTONEMPTY},
+	{"ITEM_FLAG_NOAUTORELOAD",      ITEM_FLAG_NOAUTORELOAD},
+	{"ITEM_FLAG_NOAUTOSWITCHEMPTY", ITEM_FLAG_NOAUTOSWITCHEMPTY},
+	{"ITEM_FLAG_LIMITINWORLD",      ITEM_FLAG_LIMITINWORLD},
+	{"ITEM_FLAG_EXHAUSTIBLE",       ITEM_FLAG_EXHAUSTIBLE},
+	{"ITEM_FLAG_DOHITLOCATIONDMG",  ITEM_FLAG_DOHITLOCATIONDMG},
+	{"ITEM_FLAG_NOAMMOPICKUPS",     ITEM_FLAG_NOAMMOPICKUPS},
+	{"ITEM_FLAG_NOITEMPICKUP",      ITEM_FLAG_NOITEMPICKUP},
+}
+
+local pWeaponSoundCategories = {
+	"empty",
+	"single_shot",
+	"single_shot_npc",
+	"double_shot",
+	"double_shot_npc",
+	"burst",
+	"reload",
+	"reload_npc",
+	"melee_miss",
+	"melee_hit",
+	"melee_hit_world",
+	"special1",
+	"special2",
+	"special3",
+	"taunt",
+	"deploy",
+}
+
 Primary_Mode = 0
 Secondary_Mode = 1
 
@@ -172,8 +211,38 @@ function SWEP:ParseWeaponData()
 	local selfTable = self:GetTable()
 
 	local pKeyValuesData = swsrc.KeyValuesHelper(selfTable.WeaponData or "")
+	if not pKeyValuesData then return end
 
 	local data = {
+		szPrintName               = pKeyValuesData:GetString("printname", "!!! Missing printname on weapon"),
+		szViewModel               = pKeyValuesData:GetString("viewmodel"),
+		szWorldModel              = pKeyValuesData:GetString("playermodel"),
+		szAnimationPrefix         = pKeyValuesData:GetString("anim_prefix"),
+		iSlot                     = pKeyValuesData:GetInt("bucket", 0),
+		iPosition                 = pKeyValuesData:GetInt("bucket_position", 0),
+		iMaxClip1                 = pKeyValuesData:GetInt("clip_size", -1),
+		iMaxClip2                 = pKeyValuesData:GetInt("clip2_size", -1),
+		iWeight                   = pKeyValuesData:GetInt("weight", 0),
+
+		iRumbleEffect             = pKeyValuesData:GetInt("rumble", -1),
+
+		iFlags                    = pKeyValuesData:GetInt("item_flags", ITEM_FLAG_LIMITINWORLD),
+
+		bShowUsageHint            = pKeyValuesData:GetBool("showusagehint", false),
+		bAutoSwitchTo             = pKeyValuesData:GetBool("autoswitchto", true),
+		bAutoSwitchFrom           = pKeyValuesData:GetBool("autoswitchfrom", true),
+		m_bBuiltRightHanded       = pKeyValuesData:GetBool("BuiltRightHanded", true),
+		m_bAllowFlipping          = pKeyValuesData:GetBool("AllowFlipping", true),
+		m_bMeleeWeapon            = pKeyValuesData:GetBool("MeleeWeapon", false),
+
+		szAmmo1                   = pKeyValuesData:GetString("primary_ammo", "None"),
+		szAmmo2                   = pKeyValuesData:GetString("secondary_ammo", "None"),
+
+		aShootSounds              = {},
+		TextureData               = {},
+
+		-- vvv CS:S specific vvv --
+
 		m_flMaxSpeed              = pKeyValuesData:GetInt("MaxPlayerSpeed", 1),
 
 		m_iWeaponPrice            = pKeyValuesData:GetInt("WeaponPrice", -1),
@@ -230,6 +299,61 @@ function SWEP:ParseWeaponData()
 		m_szDroppedModel          = pKeyValuesData:GetString("DroppedModel"),
 		m_szSilencerModel         = pKeyValuesData:GetString("SilencerModel"),
 	}
+
+	data.iDefaultClip1 = pKeyValuesData:GetInt("default_clip", data.iMaxClip1)
+	data.iDefaultClip2 = pKeyValuesData:GetInt("default_clip2", data.iMaxClip2)
+
+	for _, flag in ipairs(g_ItemFlags) do
+		local iVal = pKeyValuesData:GetInt(flag[1], -1)
+		if iVal == 0 then
+			data.iFlags = bit.band(data.iFlags, bit.bnot(flag[2]))
+		elseif iVal == 1 then
+			data.iFlags = bit.bor(data.iFlags, flag[2])
+		end
+	end
+
+	if data.szAmmo1 == "None" then data.szAmmo1 = "" end
+	data.iAmmoType = game.GetAmmoID(data.szAmmo1)
+	if data.szAmmo2 == "None" then data.szAmmo2 = "" end
+	data.iAmmo2Type = game.GetAmmoID(data.szAmmo2)
+
+	local pSoundData = pKeyValuesData:FindKey("SoundData")
+	if pSoundData then
+		for i = 1, 16 do
+			local soundname = pSoundData:GetString(pWeaponSoundCategories[i], "")
+			if soundname ~= "" then
+				data.aShootSounds[i] = soundname
+			end
+		end
+	end
+
+	local pTextureSection = pKeyValuesData:FindKey("TextureData")
+	if pTextureSection then
+		for key, pTemp in pTextureSection:IterValues() do
+			if pTemp:GetString("font", "") ~= "" then
+				data.TextureData[key] = {
+					szShortName = key,
+					bRenderedUsingFont = true,
+					cCharacterInFont = pTemp:GetString("character", ""),
+					szTextureFile = pTemp:GetString("font"),
+				}
+			else
+				data.TextureData[key] = {
+					-- i dont think anything in cs:s uses TextureFileRefs?
+					szShortName = key,
+					szTextureFile = pTemp:GetString("file"),
+					bRenderedUsingFont = false,
+					rc = {
+						left = pTemp:GetInt("x", 0),
+						top = pTemp:GetInt("y", 0),
+						right = pTemp:GetInt("width", 0),
+						bottom = pTemp:GetInt("height", 0),
+					},
+				}
+			end
+		end
+	end
+
 	data.m_iDefaultPrice = data.m_iWeaponPrice
 
 	local pMuzzleFlashStyle = pKeyValuesData:GetString("MuzzleFlashStyle", "CS_MUZZLEFLASH_NORM")
