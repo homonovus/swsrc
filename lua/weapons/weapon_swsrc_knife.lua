@@ -6,8 +6,8 @@ SWEP.Category = "Counter-Strike: Source"
 SWEP.PrintName = "Knife"
 SWEP.Spawnable = true
 SWEP.HoldType = "knife"
-SWEP.WorldModel = Model("models/weapons/w_knife_t.mdl")
-SWEP.ViewModel = Model("models/weapons/cstrike/c_knife_t.mdl")
+SWEP.WorldModel = "models/weapons/w_knife_t.mdl"
+SWEP.ViewModel = "models/weapons/cstrike/c_knife_t.mdl"
 
 SWEP.WeaponData = [=[WeaponData
 {

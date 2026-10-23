@@ -112,6 +112,34 @@ hook.Add("Initialize", "swsrc.ammo", function()
 	})
 end)
 
+WEAPONTYPE_KNIFE = 0
+WEAPONTYPE_PISTOL = 1
+WEAPONTYPE_SUBMACHINEGUN = 2
+WEAPONTYPE_RIFLE = 3
+WEAPONTYPE_SHOTGUN = 4
+WEAPONTYPE_SNIPER_RIFLE = 5
+WEAPONTYPE_MACHINEGUN = 6
+WEAPONTYPE_C4 = 7
+WEAPONTYPE_GRENADE = 8
+WEAPONTYPE_UNKNOWN = 9
+
+local s_weaponTypeInfo = {
+	{WEAPONTYPE_KNIFE,         "Knife"},
+	{WEAPONTYPE_PISTOL,        "Pistol"},
+	{WEAPONTYPE_SUBMACHINEGUN, "Submachine Gun"}, -- First match is printable
+	{WEAPONTYPE_SUBMACHINEGUN, "submachinegun"},
+	{WEAPONTYPE_SUBMACHINEGUN, "smg"},
+	{WEAPONTYPE_RIFLE,         "Rifle"},
+	{WEAPONTYPE_SHOTGUN,       "Shotgun"},
+	{WEAPONTYPE_SNIPER_RIFLE,  "Sniper Rifle"}, -- First match is printable
+	{WEAPONTYPE_SNIPER_RIFLE,  "SniperRifle"},
+	{WEAPONTYPE_MACHINEGUN,    "Machine Gun"}, -- First match is printable
+	{WEAPONTYPE_MACHINEGUN,    "machinegun"},
+	{WEAPONTYPE_MACHINEGUN,    "mg"},
+	{WEAPONTYPE_C4,            "C4"},
+	{WEAPONTYPE_GRENADE,       "Grenade"},
+}
+
 Primary_Mode = 0
 Secondary_Mode = 1
 
@@ -121,16 +149,99 @@ function SWEP:Initialize()
 	local selfTable = self:GetTable()
 
 	self:SetHoldType(selfTable.HoldType or "pistol")
+	selfTable.ParseWeaponData(self)
 end
 
-function SWEP:GetWpnData()
-	local selfTable = self:GetTable()
-
-	if not selfTable.CSWpnData then
-		selfTable.CSWpnData = util.KeyValuesToTable(selfTable.WeaponData, false, true)
+local function makeModeValues(pKeyValuesData, key, default)
+	return {
+		[0] = pKeyValuesData:GetFloat(key, default),
+		[1] = pKeyValuesData:GetFloat(key .. "Alt", default),
+	}
+end
+local function WeaponClassFromString(weaponType)
+	for _, info in ipairs(s_weaponTypeInfo) do
+		if info[2] == weaponType then
+			return info[1]
+		end
 	end
 
-	return selfTable.CSWpnData
+	return WEAPONTYPE_UNKNOWN
+end
+
+function SWEP:ParseWeaponData()
+	local selfTable = self:GetTable()
+
+	local pKeyValuesData = swsrc.KeyValuesHelper(selfTable.WeaponData or "")
+
+	local data = {
+		m_flMaxSpeed              = pKeyValuesData:GetInt("MaxPlayerSpeed", 1),
+
+		m_iWeaponPrice            = pKeyValuesData:GetInt("WeaponPrice", -1),
+
+		m_flArmorRatio            = pKeyValuesData:GetFloat("WeaponArmorRatio", 1),
+		m_iCrosshairMinDistance   = pKeyValuesData:GetInt("CrosshairMinDistance", 4),
+		m_iCrosshairDeltaDistance = pKeyValuesData:GetInt("CrosshairDeltaDistance", 3),
+		m_bCanUseWithShield       = not not pKeyValuesData:GetInt("CanEquipWithShield", false),
+		m_flMuzzleScale           = pKeyValuesData:GetFloat("MuzzleFlashScale", 1),
+
+		m_iPenetration            = pKeyValuesData:GetInt("Penetration", 1),
+		m_iDamage                 = pKeyValuesData:GetInt("Damage", 42), -- Douglas Adams 1952 - 2001
+		m_flRange                 = pKeyValuesData:GetFloat("Range", 8192),
+		m_flRangeModifier         = pKeyValuesData:GetFloat("RangeModifier", 0.98),
+		m_iBullets                = pKeyValuesData:GetInt("Bullets", 1),
+		m_flCycleTime             = pKeyValuesData:GetFloat("CycleTime", 0.15),
+		m_bAccuracyQuadratic      = pKeyValuesData:GetInt("AccuracyQuadratic", 0),
+		m_flAccuracyDivisor       = pKeyValuesData:GetFloat("AccuracyDivisor", -1), -- -1 = off
+		m_flAccuracyOffset        = pKeyValuesData:GetFloat("AccuracyOffset", 0),
+		m_flMaxInaccuracy         = pKeyValuesData:GetFloat("MaxInaccuracy", 0),
+
+		-- new accuracy model parameters
+		m_fSpread                 = makeModeValues(pKeyValuesData, "Spread", 0),
+		m_fInaccuracyCrouch       = makeModeValues(pKeyValuesData, "InaccuracyCrouch", 0),
+		m_fInaccuracyStand        = makeModeValues(pKeyValuesData, "InaccuracyStand", 0),
+		m_fInaccuracyJump         = makeModeValues(pKeyValuesData, "InaccuracyJump", 0),
+		m_fInaccuracyLand         = makeModeValues(pKeyValuesData, "InaccuracyLand", 0),
+		m_fInaccuracyLadder       = makeModeValues(pKeyValuesData, "InaccuracyLadder", 0),
+		m_fInaccuracyImpulseFire  = makeModeValues(pKeyValuesData, "InaccuracyImpulseFire", 0),
+		m_fInaccuracyMove         = makeModeValues(pKeyValuesData, "InaccuracyMove", 0),
+
+		m_fInaccuracyReload       = pKeyValuesData:GetFloat("InaccuracyReload", 0),
+		m_fInaccuracyAltSwitch    = pKeyValuesData:GetFloat("InaccuracyAltSwitch", 0),
+
+		m_fRecoveryTimeCrouch     = pKeyValuesData:GetFloat("RecoveryTimeCrouch", 1),
+		m_fRecoveryTimeStand      = pKeyValuesData:GetFloat("RecoveryTimeStand", 1),
+
+		m_flTimeToIdleAfterFire   = pKeyValuesData:GetFloat("TimeToIdle", 2),
+		m_flIdleInterval          = pKeyValuesData:GetFloat("IdleInterval", 20),
+
+		m_iTeam                   = -1, -- dont care currently
+
+		m_WrongTeamMsg            = pKeyValuesData:GetString("WrongTeamMsg", ""),
+		m_szShieldViewModel       = pKeyValuesData:GetString("shieldviewmodel", ""),
+		m_szAnimExtension         = pKeyValuesData:GetString("PlayerAnimationExtension", "m4"),
+
+		m_flBotAudibleRange       = pKeyValuesData:GetFloat("BotAudibleRange", 2000),
+
+		m_WeaponType              = WeaponClassFromString(pKeyValuesData:GetString("WeaponType", "")),
+
+		m_bFullAuto               = pKeyValuesData:GetBool("FullAuto"),
+
+		m_szAddonModel            = pKeyValuesData:GetString("AddonModel"),
+		m_szDroppedModel          = pKeyValuesData:GetString("DroppedModel"),
+		m_szSilencerModel         = pKeyValuesData:GetString("SilencerModel"),
+	}
+	data.m_iDefaultPrice = data.m_iWeaponPrice
+
+	local pMuzzleFlashStyle = pKeyValuesData:GetString("MuzzleFlashStyle", "CS_MUZZLEFLASH_NORM")
+	if pMuzzleFlashStyle == "CS_MUZZLEFLASH_X" then
+		data.m_iMuzzleFlashStyle = 1
+	elseif pMuzzleFlashStyle == "CS_MUZZLEFLASH_NONE" then
+		data.m_iMuzzleFlashStyle = -1
+	else
+		data.m_iMuzzleFlashStyle = 0
+	end
+
+	selfTable.CSWpnData = data
 end
 
 function SWEP:SetupDataTables()
@@ -161,12 +272,12 @@ end
 function SWEP:IsPistol(tbl)
 	local selfTable = tbl or self:GetTable()
 
-	return selfTable.GetWpnData(self).WeaponType == "Pistol"
+	return selfTable.CSWpnData.m_WeaponType == WEAPONTYPE_PISTOL
 end
 function SWEP:IsFullAuto(tbl)
 	local selfTable = tbl or self:GetTable()
 
-	return tobool(selfTable.GetWpnData(self).FullAuto)
+	return selfTable.CSWpnData.m_bFullAuto
 end
 
 function SWEP:PlayEmptySound(tbl)
@@ -390,20 +501,14 @@ function SWEP:GetInaccuracy()
 	local owner = selfTable.GetPlayerOwner(self)
 	if not owner then return 0 end
 
-	local wdat = selfTable.GetWpnData(self)
-
 	local fMaxSpeed = selfTable.GetMaxSpeed(self)
-
-	local moveKey = "InaccuracyMove"
-	if selfTable.GetWeaponMode(self) == Secondary_Mode then
-		moveKey = moveKey .. "Alt"
-	end
+	local mode = selfTable.GetWeaponMode(self)
 
 	return selfTable.GetAccuracyPenalty(self) +
 			math.Remap(owner:GetVelocity():Length2D(),
 				fMaxSpeed * 0.34, -- CS_PLAYER_SPEED_DUCK_MODIFIER
 				fMaxSpeed * 0.95,
-				0.0, tonumber(wdat[moveKey]))
+				0.0, selfTable.CSWpnData.m_fInaccuracyMove[mode])
 end
 
 function SWEP:GetSpread()
@@ -412,16 +517,13 @@ function SWEP:GetSpread()
 	end
 
 	local selfTable = self:GetTable()
-	local spreadKey = "Spread"
-	if selfTable.GetWeaponMode(self) == Secondary_Mode then
-		spreadKey = spreadKey .. "Alt"
-	end
+	local mode = selfTable.GetWeaponMode(self)
 
-	return tonumber(selfTable.GetWpnData(self)[spreadKey])
+	return selfTable.CSWpnData.m_fSpread[mode]
 end
 
 function SWEP:GetMaxSpeed()
-	return tonumber(self:GetTable().GetWpnData(self).MaxPlayerSpeed) / 320
+	return self:GetTable().CSWpnData.m_flMaxSpeed
 end
 
 function SWEP:Holster()
@@ -485,29 +587,19 @@ function SWEP:UpdateAccuracyPenalty(tbl)
 	local owner = selfTable.GetPlayerOwner(self)
 	if not owner then return end
 
-	local wdat = selfTable.GetWpnData(self)
-
 	local fNewPenalty = 0
 
-	local isAlt = selfTable.GetWeaponMode(self) == Secondary_Mode
-
-	local standKey = "InaccuracyStand"
-	local ladderKey = "InaccuracyLadder"
-	local duckKey = "InaccuracyCrouch"
-	if isAlt then
-		standKey = standKey .. "Alt"
-		ladderKey = ladderKey .. "Alt"
-		duckKey = duckKey .. "Alt"
-	end
+	local wdat = selfTable.CSWpnData
+	local mode = selfTable.GetWeaponMode(self)
 
 	if owner:GetMoveType() == MOVETYPE_LADDER then
-		fNewPenalty = fNewPenalty + (tonumber(wdat[standKey]) or 0) + (tonumber(wdat[ladderKey]) or 0)
+		fNewPenalty = fNewPenalty + wdat.m_fInaccuracyStand[mode] + wdat.m_fInaccuracyLadder[mode]
 	elseif bit.band(owner:GetFlags(), FL_DUCKING) ~= 0 then
-		fNewPenalty = fNewPenalty + (tonumber(wdat[duckKey]) or 0)
+		fNewPenalty = fNewPenalty + wdat.m_fInaccuracyCrouch[mode]
 	end
 
 	if selfTable.GetInReload(self) then
-		fNewPenalty = fNewPenalty + (tonumber(wdat.InaccuracyReload) or 0)
+		fNewPenalty = fNewPenalty + wdat.m_fInaccuracyReload
 	end
 
 	if fNewPenalty > selfTable.GetAccuracyPenalty(self) then
@@ -516,13 +608,13 @@ function SWEP:UpdateAccuracyPenalty(tbl)
 		local fDecayFactor = 0
 
 		if owner:GetMoveType() == MOVETYPE_LADDER then
-			fDecayFactor = math.log(10) / (tonumber(wdat.RecoveryTimeStand) or 1)
+			fDecayFactor = math.log(10) / wdat.m_fRecoveryTimeStand
 		elseif not owner:IsOnGround() then
-			fDecayFactor = math.log(10) / ((tonumber(wdat.RecoveryTimeCrouch) or 1) * 3)
+			fDecayFactor = math.log(10) / (wdat.m_fRecoveryTimeCrouch * 3)
 		elseif bit.band(owner:GetFlags(), FL_DUCKING) ~= 0 then
-			fDecayFactor = math.log(10) / (tonumber(wdat.RecoveryTimeCrouch) or 1)
+			fDecayFactor = math.log(10) / wdat.m_fRecoveryTimeCrouch
 		else
-			fDecayFactor = math.log(10) / (tonumber(wdat.RecoveryTimeStand) or 1)
+			fDecayFactor = math.log(10) / wdat.m_fRecoveryTimeStand
 		end
 
 		selfTable.SetAccuracyPenalty(self,
