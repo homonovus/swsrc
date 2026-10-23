@@ -74,25 +74,25 @@ function SWEP:DoDrawCrosshair(x, y)
 
 	local wdat = selfTable.CSWpnData
 
-	local bCrosshairVisible = wdat.m_WeaponType == WEAPONTYPE_SNIPER_RIFLE
-	if bCrosshairVisible and not weapon_debug_spread_show:GetBool() then return end
+	local bCrosshairVisible = wdat.m_WeaponType ~= WEAPONTYPE_SNIPER_RIFLE
+	if not bCrosshairVisible and not weapon_debug_spread_show:GetBool() then return true end
 
 	local fHalfFov = math.rad(owner:GetFOV())
 
 	local m_flCrosshairDistance = 0
 	local iCrosshairDistance = 0
-	local iBarSize = math.ceil(ScreenScaleH(cl_crosshairsize:GetFloat()))
-	local iBarThickness = math.max(1, math.ceil(ScreenScaleH(cl_crosshairthickness:GetFloat())))
+	local iBarSize = math.floor(ScreenScaleH(cl_crosshairsize:GetFloat()))
+	local iBarThickness = math.max(1, math.floor(ScreenScaleH(cl_crosshairthickness:GetFloat())))
 
 	local dynamic = cl_dynamiccrosshair:GetInt()
 	local mode = selfTable.GetWeaponMode(self)
 	if dynamic == 0 then
 		-- static crosshair
 		local fSpread = wdat.m_fSpread[mode] + wdat.m_fInaccuracyStand[mode] * 320 / math.tan(fHalfFov)
-		iCrosshairDistance = math.max(0, math.ceil(ScreenScaleH(fSpread * cl_crosshairspreadscale:GetFloat())))
+		iCrosshairDistance = math.max(0, math.floor(ScreenScaleH(fSpread * cl_crosshairspreadscale:GetFloat())))
 	elseif dynamic == 1 then
 		local fSpread = (selfTable.GetInaccuracy(self) + selfTable.GetSpread(self)) * 320 / math.tan(fHalfFov)
-		iCrosshairDistance = math.max(0, math.ceil(ScreenScaleH(fSpread * cl_crosshairspreadscale:GetFloat())))
+		iCrosshairDistance = math.max(0, math.floor(ScreenScaleH(fSpread * cl_crosshairspreadscale:GetFloat())))
 	elseif dynamic == 2 or dynamic == 3 then
 		local fCrosshairDistanceGoal = wdat.m_iCrosshairMinDistance
 
@@ -144,47 +144,40 @@ function SWEP:DoDrawCrosshair(x, y)
 				scale = ScrH() / crosshairScale
 			end
 
-			iCrosshairDistance = math.ceil(m_flCrosshairDistance * scale)
+			iCrosshairDistance = math.floor(m_flCrosshairDistance * scale)
 
 			iBarSize = ScreenScale(5)
 			iBarSize = math.max(1, math.floor(iBarSize * scale))
 			iBarThickness = math.max(1, math.floor(scale + 0.5))
 		else
-			iCrosshairDistance = math.ceil(m_flCrosshairDistance * ScrH() / 1200)
+			iCrosshairDistance = math.floor(m_flCrosshairDistance * ScrH() / 1200)
 		end
 	end
 
-	local iCenterX = ScrW() / 2
-	local iCenterY = ScrH() / 2
-
 	if bCrosshairVisible then
 		-- draw horizontal crosshair lines
-		local iInnerLeft = iCenterX - iCrosshairDistance - iBarThickness / 2
-		local iInnerRight = iInnerLeft + 2 * iCrosshairDistance + iBarThickness
-		local iOuterLeft = iInnerLeft - iBarSize
-		local iOuterRight = iInnerRight + iBarSize
-		local y0 = iCenterY - iBarThickness / 2
-		local y1 = y0 + iBarThickness
-		DrawCrosshairRect(iOuterLeft, y0, iInnerLeft, y1, bAdditive)
-		DrawCrosshairRect(iInnerRight, y0, iOuterRight, y1, bAdditive)
+		local iLeft = -(iCrosshairDistance + iBarSize)
+		local iRight = iCrosshairDistance + iBarThickness
+		local iFarLeft = iBarSize
+		local iFarRight = iBarSize
+		DrawCrosshairRect(x + iLeft, y, iFarLeft, iBarThickness, bAdditive)
+		DrawCrosshairRect(x + iRight, y, iFarRight, iBarThickness, bAdditive)
 
-		-- draw vertiocal crosshair lines
-		local iInnerTop = iCenterY - iCrosshairDistance - iBarThickness / 2
-		local iInnerBottom = iInnerTop + 2 * iCrosshairDistance + iBarThickness
-		local iOuterTop = iInnerTop - iBarSize
-		local iOuterBottom = iInnerBottom + iBarSize
-		local x0 = iCenterX - iBarThickness / 2
-		local x1 = x0 + iBarThickness
-		DrawCrosshairRect(x0, iOuterTop, x1, iInnerTop, bAdditive)
-		DrawCrosshairRect(x0, iInnerBottom, x1, iOuterBottom, bAdditive)
+		-- draw vertical crosshair lines
+		local iTop = -(iCrosshairDistance + iBarSize)
+		local iBottom = iCrosshairDistance + iBarThickness
+		local iFarTop = iBarSize
+		local iFarBottom = iBarSize
+		DrawCrosshairRect(x, y + iTop, iBarThickness, iFarTop, bAdditive)
+		DrawCrosshairRect(x, y + iBottom, iBarThickness, iFarBottom, bAdditive)
 
 		-- draw dot
 		if cl_crosshairdot:GetBool() then
-			local x0 = iCenterX - iBarThickness / 2
-			local x1 = x0 + iBarThickness
-			local y0 = iCenterY - iBarThickness / 2
-			local y1 = y0 + iBarThickness
-			DrawCrosshairRect(x0, y0, x1, y1, bAdditive)
+			local x0 = iBarThickness / 2
+			local x1 = iBarThickness
+			local y0 = iBarThickness / 2
+			local y1 = iBarThickness
+			DrawCrosshairRect(x + x0, y + y0, x1, y1, bAdditive)
 		end
 	end
 
@@ -205,44 +198,44 @@ function SWEP:DoDrawCrosshair(x, y)
 				vecDirShooting.z = -sp
 			end
 
-			local iOffsetX = math.ceil(ScreenScaleH(vecDirShooting.y * 320 / math.tan(fHalfFov)))
-			local iOffsetY = math.ceil(ScreenScaleH(vecDirShooting.z * 320 / math.tan(fHalfFov)))
+			local iOffsetX = math.floor(ScreenScaleH(vecDirShooting.y * 320 / math.tan(fHalfFov)))
+			local iOffsetY = math.floor(ScreenScaleH(vecDirShooting.z * 320 / math.tan(fHalfFov)))
 
-			iCenterX = iCenterX - iOffsetX
-			iCenterY = iCenterY - iOffsetY
+			x = y - iOffsetX
+			y = y - iOffsetY
 		end
 
 		r, g, b = unpack(SWITCH_color[3])
 		surface.SetDrawColor(r, g, b, alpha)
 
-		local iBarThickness = math.max(1, math.ceil(ScreenScaleH(cl_crosshairthickness:GetFloat())))
+		local iBarThickness = math.max(1, math.floor(ScreenScaleH(cl_crosshairthickness:GetFloat())))
 
 		local fSpreadDistance = (selfTable.GetInaccuracy(self) + selfTable.GetSpread(self)) * 320 / math.tan(fHalfFov)
-		local iSpreadDistance = math.ceil(ScreenScaleH(fSpreadDistance))
+		local iSpreadDistance = math.floor(ScreenScaleH(fSpreadDistance))
 
 		-- draw vertical spread lines
-		local iInnerLeft = iCenterX - iSpreadDistance
-		local iInnerRight = iCenterX + iSpreadDistance
-		local iOuterLeft = iInnerLeft - iBarThickness
-		local iOuterRight = iInnerRight + iBarThickness
-		local iInnerTop = iCenterY - iSpreadDistance
-		local iInnerBottom = iCenterY + iSpreadDistance
-		local iOuterTop = iInnerTop - iBarThickness
-		local iOuterBottom = iInnerBottom + iBarThickness
+		local iInnerLeft = -iSpreadDistance
+		local iInnerRight = iSpreadDistance
+		local iOuterLeft = iBarThickness
+		local iOuterRight = iBarThickness
+		local iInnerTop = -iSpreadDistance
+		local iInnerBottom = iSpreadDistance
+		local iOuterTop = iBarThickness
+		local iOuterBottom = iBarThickness
 
 		local iGap = math.ceil(weapon_debug_spread_gap:GetFloat() * iSpreadDistance)
 
 		-- draw horizontal lines
-		DrawCrosshairRect(iOuterLeft, iOuterTop, iCenterX - iGap, iInnerTop, bAdditive)
-		DrawCrosshairRect(iCenterX + iGap, iOuterTop, iOuterRight, iInnerTop, bAdditive)
-		DrawCrosshairRect(iOuterLeft, iInnerBottom, iCenterX - iGap, iOuterBottom, bAdditive)
-		DrawCrosshairRect(iCenterX + iGap, iInnerBottom, iOuterRight, iOuterBottom, bAdditive)
+		DrawCrosshairRect(x + iOuterLeft, y + iOuterTop, iGap, iInnerTop, bAdditive)
+		DrawCrosshairRect(x + iGap, y + iOuterTop, iOuterRight, iInnerTop, bAdditive)
+		DrawCrosshairRect(x + iOuterLeft, y + iInnerBottom, iGap, iOuterBottom, bAdditive)
+		DrawCrosshairRect(x + iGap, y + iInnerBottom, iOuterRight, iOuterBottom, bAdditive)
 
 		-- draw vertical lines
-		DrawCrosshairRect(iOuterLeft, iOuterTop, iInnerLeft, iCenterY - iGap, bAdditive)
-		DrawCrosshairRect(iOuterLeft, iCenterY + iGap, iInnerLeft, iOuterBottom, bAdditive)
-		DrawCrosshairRect(iInnerRight, iOuterTop, iOuterRight, iCenterY - iGap, bAdditive)
-		DrawCrosshairRect(iInnerRight, iCenterY + iGap, iOuterRight, iOuterBottom, bAdditive)
+		DrawCrosshairRect(x + iOuterLeft, y + iOuterTop, iInnerLeft, iGap, bAdditive)
+		DrawCrosshairRect(x + iOuterLeft, y + iGap, iInnerLeft, iOuterBottom, bAdditive)
+		DrawCrosshairRect(x + iInnerRight, y + iOuterTop, iOuterRight, iGap, bAdditive)
+		DrawCrosshairRect(x + iInnerRight, y + iGap, iOuterRight, iOuterBottom, bAdditive)
 	end
 
 	return true

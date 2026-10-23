@@ -30,3 +30,4 @@ if CLIENT then
 end
 
 CreateConVar("swsrc_weapon_accuracy_model", "2", bit.bor(FCVAR_REPLICATED, FCVAR_ARCHIVE))
+CreateConVar("swsrc_knife_damage_scale", "100")

@@ -317,6 +317,7 @@ local filter_IgnoreOwner = swcs and swcs.filter_IgnoreOwner or function(owner, _
 local IGNORE_SHIELD = {"swcs_shield"}
 
 local phys_pushscale = GetConVar("phys_pushscale")
+local KnifeDamageScale = GetConVar("swsrc_knife_damage_scale")
 function SWEP:SwingOrStab(bStab)
 	local selfTable = self:GetTable()
 
@@ -417,6 +418,8 @@ function SWEP:SwingOrStab(bStab)
 				end
 			end
 
+			flDamage = flDamage * (KnifeDamageScale:GetInt() / 100)
+
 			local info = DamageInfo()
 			info:SetInflictor(self)
 			info:SetAttacker(owner)
@@ -434,9 +437,12 @@ function SWEP:SwingOrStab(bStab)
 			vecForce:Mul(flScale)
 			info:SetDamageForce(vecForce)
 
-			if pEntity and pEntity:IsValid() then
-				pEntity:DispatchTraceAttack(info, tr)
+			if not pEntity or not pEntity:IsValid() then
+				-- makes glass breakable with no hacky workaround
+				pEntity = game.GetWorld()
 			end
+
+			pEntity:DispatchTraceAttack(info, tr)
 
 			--SuppressHostEvents(owner)
 		end
