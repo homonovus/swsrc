@@ -148,8 +148,7 @@ function SWEP:SecondaryAttack()
 	if not owner then return end
 
 	local fov = math.floor(owner:GetFOV())
-	local defaultFov = owner:GetDefaultFOV()
-	if fov == defaultFov then
+	if fov == owner:GetDefaultFOV() then
 		owner:SetFOV(cAWPMidZoomFOV, kZoomTime)
 		selfTable.SetWeaponMode(self, Secondary_Mode)
 		selfTable.SetAccuracyPenalty(self, selfTable.GetAccuracyPenalty(self) + selfTable.CSWpnData.m_fInaccuracyAltSwitch)
@@ -159,7 +158,7 @@ function SWEP:SecondaryAttack()
 		selfTable.SetWeaponMode(self, Secondary_Mode)
 		self:SetHoldType("rpg")
 	else
-		owner:SetFOV(defaultFov, kZoomTime)
+		owner:SetFOV(0, kZoomTime)
 		selfTable.SetWeaponMode(self, Primary_Mode)
 		self:SetHoldType(selfTable.HoldType)
 	end

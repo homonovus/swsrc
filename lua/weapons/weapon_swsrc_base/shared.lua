@@ -389,6 +389,17 @@ function SWEP:ProcessActivities(tbl)
 	selfTable.m_bProcessingActivities = false
 end
 
+local function RemapClamped(value, A, B, C, D)
+	if A == B then
+		return value >= B and D or C
+	end
+
+	local cVal = (value - A) / (B - A)
+	cVal = math.Clamp(cVal, 0, 1)
+
+	return C + (D - C) * cVal
+end
+
 function SWEP:GetInaccuracy()
 	local selfTable = self:GetTable()
 
@@ -399,7 +410,7 @@ function SWEP:GetInaccuracy()
 	local mode = selfTable.GetWeaponMode(self)
 
 	return selfTable.GetAccuracyPenalty(self) +
-			math.Remap(owner:GetVelocity():Length2D(),
+			RemapClamped(owner:GetVelocity():Length2D(),
 				fMaxSpeed * 0.34, -- CS_PLAYER_SPEED_DUCK_MODIFIER
 				fMaxSpeed * 0.95,
 				0.0, selfTable.CSWpnData.m_fInaccuracyMove[mode])
@@ -503,6 +514,8 @@ function SWEP:UpdateAccuracyPenalty(tbl)
 		fNewPenalty = fNewPenalty + wdat.m_fInaccuracyStand[mode] + wdat.m_fInaccuracyLadder[mode]
 	elseif bit.band(owner:GetFlags(), FL_DUCKING) ~= 0 then
 		fNewPenalty = fNewPenalty + wdat.m_fInaccuracyCrouch[mode]
+	else
+		fNewPenalty = fNewPenalty + wdat.m_fInaccuracyStand[mode]
 	end
 
 	if selfTable.GetInReload(self) then

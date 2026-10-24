@@ -58,7 +58,7 @@ function SWEP:CSBaseGunFire(flCycleTime, weaponMode)
 		selfTable.SetShotsFired(self, selfTable.GetShotsFired(self) + 1)
 
 		-- These modifications feed back into flSpread eventually.
-		if pCSInfo.m_flAccuracyDivisor ~= 1 then
+		if pCSInfo.m_flAccuracyDivisor ~= -1 then
 			local iShotsFired = selfTable.GetShotsFired(self)
 
 			if pCSInfo.m_bAccuracyQuadratic then
@@ -92,6 +92,8 @@ function SWEP:CSBaseGunFire(flCycleTime, weaponMode)
 	selfTable.SetWeaponAnim(self, ACT_VM_PRIMARYATTACK)
 
 	self:SetClip1(self:Clip1() - 1)
+
+	owner:SetAnimation(PLAYER_ATTACK1)
 
 	selfTable.FX_FireBullets(self, weaponMode, flCurAttack)
 

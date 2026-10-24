@@ -205,7 +205,7 @@ function SWEP:CS_FireBullet(vecSrc, shootAngles, flDistance, iPenetration, iBull
 		--bFirstHit = false
 
 		local pSurfaceData = util.GetSurfaceData(tr.SurfaceProps)
-		local iEnterMaterial = pSurfaceData.material
+		local iEnterMaterial = pSurfaceData and pSurfaceData.material or -1
 		local matParams = SWITCH_MaterialParameters[iEnterMaterial]
 
 		local hitGrate = bit.band(tr.Contents, CONTENTS_GRATE) ~= 0
@@ -355,7 +355,7 @@ function SWEP:CS_FireBullet(vecSrc, shootAngles, flDistance, iPenetration, iBull
 		end
 
 		pSurfaceData = util.GetSurfaceData(exitTr.SurfaceProps)
-		local iExitMaterial = pSurfaceData.material
+		local iExitMaterial = pSurfaceData and pSurfaceData.material or -1
 
 		hitGrate = hitGrate and bit.band(exitTr.Contents, CONTENTS_GRATE) ~= 0
 
