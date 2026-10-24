@@ -433,9 +433,13 @@ do -- view bob
 end
 
 do -- weapon selection
+	local function ScreenScaleH1080(v)
+		return v * (math.min(ScrH(), 1080) / 480)
+	end
+
 	local font_CSweapons = {
 		font = system.IsLinux() and "cs.ttf" or "cs",
-		size = ScreenScaleH(70),
+		size = ScreenScaleH1080(70),
 		weight = 0,
 		additive = true,
 		antialias = true,
@@ -445,8 +449,9 @@ do -- weapon selection
 	font_CSweapons.scanlines = ScreenScaleH(2)
 	surface.CreateFont("CSweapons_glow", font_CSweapons)
 
-	function SWEP:RenderTextureData(key, x, y, w, h, col, glow)
+	function SWEP:RenderTextureData(key, x, y, w, h, col, glow, lower)
 		if glow == nil then glow = false end
+		if lower == nil then lower = false end
 
 		local iconDataKV = self.CSWpnData.TextureData[key]
 		if not iconDataKV then return end
@@ -456,6 +461,9 @@ do -- weapon selection
 		if File and #File > 0 then
 			if iconDataKV.bRenderedUsingFont then
 				local character = iconDataKV.cCharacterInFont
+				if lower then
+					character = character:lower()
+				end
 
 				surface.SetFont(File)
 				local cw, ch = surface.GetTextSize(character)
@@ -494,9 +502,23 @@ do -- weapon selection
 		end
 	end
 
-	SWEP.SelectionColor = Color(255, 255, 255, 255)
+	SWEP.SelectionColor = Color(255, 220, 0, 255)
+	local path = "resource/clientscheme.res"
+	if not file.Exists(path, "MOD") then
+		path = "resource/ClientScheme.res"
+	end
+	if file.Exists(path, "MOD") then
+		local kv = swsrc.KeyValuesHelper(file.Read(path, "MOD"))
+		if kv then
+			local BaseSettings = kv:FindKey("basesettings")
+			if BaseSettings then
+				SWEP.SelectionColor = string.ToColor(BaseSettings:GetString("brightfg", "255 220 0 255"))
+			end
+		end
+	end
+
 	function SWEP:DrawWeaponSelection(x, y, w, h, a)
 		self.SelectionColor.a = a
-		self:RenderTextureData("weapon_s", x, y, w, h, self.SelectionColor, true)
+		self:RenderTextureData("weapon_s", x, y, w, h, self.SelectionColor, true, true)
 	end
 end
