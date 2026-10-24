@@ -4,16 +4,16 @@ local group_others = CreateClientConVar("swsrc_group_others", "1", true, false,
 	"Whether or not to group other swsrc addons under the CS:S category", 0, 1)
 
 local categoryMap = {
-	[WEAPONTYPE_KNIFE] = "zzzother",
+	[WEAPONTYPE_KNIFE] = "#spawnmenu.category.other",
 	[WEAPONTYPE_PISTOL] = "#spawnmenu.category.swsrc_pistols",
 	[WEAPONTYPE_SUBMACHINEGUN] = "#spawnmenu.category.swsrc_smgs",
 	[WEAPONTYPE_RIFLE] = "#spawnmenu.category.swsrc_rifles",
 	[WEAPONTYPE_SHOTGUN] = "#spawnmenu.category.swsrc_shotguns",
 	[WEAPONTYPE_SNIPER_RIFLE] = "#spawnmenu.category.swsrc_snipers",
 	[WEAPONTYPE_MACHINEGUN] = "#spawnmenu.category.swsrc_mgs",
-	[WEAPONTYPE_C4] = "zzzother",
+	[WEAPONTYPE_C4] = "#spawnmenu.category.other",
 	[WEAPONTYPE_GRENADE] = "#spawnmenu.category.swsrc_grenades",
-	[WEAPONTYPE_UNKNOWN] = "zzzother",
+	[WEAPONTYPE_UNKNOWN] = "#spawnmenu.category.other",
 }
 hook.Add("PopulateWeapons", "swsrc.spawnmenu", function(pnlContent, tree)
 	timer.Simple(0, function()
@@ -92,9 +92,6 @@ hook.Add("PopulateWeapons", "swsrc.spawnmenu", function(pnlContent, tree)
 					if not table.IsEmpty(subweps) then
 						---@diagnostic disable-next-line: param-type-mismatch
 						local label = vgui.Create("ContentHeader", self.PropPanel)
-						if name == "zzzother" then
-							name = "#spawnmenu.category.other"
-						end
 						label:SetText(name)
 						self.PropPanel:Add(label)
 					end
