@@ -327,7 +327,8 @@ function SWEP:SwingOrStab(bStab)
 
 	local fRange = bStab and 32 or 48
 
-	local vForward = owner:EyeAngles():Forward()
+	local vForward = owner:GetAimVector():Angle()
+	vForward:Normalize()
 	local vecSrc = owner.m_vSavedShootPos or owner:GetShootPos()
 	local vecEnd = vecSrc + vForward * fRange
 
