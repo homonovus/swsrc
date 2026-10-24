@@ -217,7 +217,7 @@ function swsrc.ParseWeaponData(WeaponData)
 		m_fInaccuracyJump         = makeModeValues(pKeyValuesData, "inaccuracyjump", 0),
 		m_fInaccuracyLand         = makeModeValues(pKeyValuesData, "inaccuracyland", 0),
 		m_fInaccuracyLadder       = makeModeValues(pKeyValuesData, "inaccuracyladder", 0),
-		m_fInaccuracyImpulseFire  = makeModeValues(pKeyValuesData, "inaccuracyimpulsefire", 0),
+		m_fInaccuracyFire         = makeModeValues(pKeyValuesData, "inaccuracyfire", 0),
 		m_fInaccuracyMove         = makeModeValues(pKeyValuesData, "inaccuracymove", 0),
 
 		m_fInaccuracyReload       = pKeyValuesData:GetFloat("inaccuracyreload", 0),

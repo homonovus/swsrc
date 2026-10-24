@@ -214,7 +214,7 @@ function SWEP:PrimaryAttack()
 	selfTable.SetReloadState(self, 0)
 
 	-- update accuracy
-	selfTable.SetAccuracyPenalty(self, selfTable.GetAccuracyPenalty(self) + wdat.m_fInaccuracyImpulseFire[Primary_Mode])
+	selfTable.SetAccuracyPenalty(self, selfTable.GetAccuracyPenalty(self) + wdat.m_fInaccuracyFire[Primary_Mode])
 
 	-- update punch angles
 	local x = math.floor(util.SharedRandom("M3PunchAngleAir", 8, 11))

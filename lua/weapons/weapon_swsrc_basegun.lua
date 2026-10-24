@@ -101,7 +101,7 @@ function SWEP:CSBaseGunFire(flCycleTime, weaponMode)
 
 	selfTable.SetWeaponIdleTime(self, CurTime() + pCSInfo.m_flTimeToIdleAfterFire)
 
-	selfTable.SetAccuracyPenalty(self, selfTable.GetAccuracyPenalty(self) + pCSInfo.m_fInaccuracyImpulseFire[weaponMode])
+	selfTable.SetAccuracyPenalty(self, selfTable.GetAccuracyPenalty(self) + pCSInfo.m_fInaccuracyFire[weaponMode])
 
 	return true
 end

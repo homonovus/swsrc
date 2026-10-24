@@ -433,13 +433,13 @@ do -- view bob
 end
 
 do -- weapon selection
-	local function ScreenScaleH1080(v)
+	local function ScreenScaleHClamped(v)
 		return v * (math.min(ScrH(), 1080) / 480)
 	end
 
 	local font_CSweapons = {
 		font = system.IsLinux() and "cs.ttf" or "cs",
-		size = ScreenScaleH1080(70),
+		size = ScreenScaleHClamped(70),
 		weight = 0,
 		additive = true,
 		antialias = true,
@@ -467,7 +467,8 @@ do -- weapon selection
 
 				surface.SetFont(File)
 				local cw, ch = surface.GetTextSize(character)
-				surface.SetTextPos(x + ((w / 2) - (cw / 2)), y + ((h / 2) - (ch / 2)))
+				local cx, cy = x + ((w / 2) - (cw / 2)), y + ((h / 2) - (ch / 2))
+				surface.SetTextPos(cx, cy)
 				surface.SetTextColor(col:Unpack())
 
 				if glow then
@@ -475,7 +476,7 @@ do -- weapon selection
 					surface.DrawText(character)
 
 					surface.SetFont(File)
-					surface.SetTextPos(x + ((w / 2) - (cw / 2)), y + ((h / 2) - (ch / 2)))
+					surface.SetTextPos(cx, cy)
 				end
 
 				surface.DrawText(character)
