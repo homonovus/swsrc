@@ -137,6 +137,10 @@ function SWEP:OverrideData(tbl)
 	tbl.SlotPos = 0
 end
 
+function SWEP:GetWeaponID()
+	return WEAPON_AWP
+end
+
 local cAWPMidZoomFOV = 40
 local cAWPMaxZoomFOV = 10
 local kZoomTime = 0.1
@@ -272,8 +276,4 @@ function SWEP:Deploy()
 	self:SetNextPrimaryFire(math.max(self:GetNextPrimaryFire(), oPri))
 	self:SetNextSecondaryFire(math.max(self:GetNextSecondaryFire(), oSec))
 	return true
-end
-
-function SWEP:GetWeaponID()
-	return WEAPON_AWP
 end

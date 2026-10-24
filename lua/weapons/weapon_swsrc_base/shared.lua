@@ -117,8 +117,6 @@ end)
 Primary_Mode = 0
 Secondary_Mode = 1
 
-SWEP.m_bDelayFire = true
-
 function SWEP:Initialize()
 	local selfTable = self:GetTable()
 
@@ -247,9 +245,9 @@ function SWEP:Think_ProcessPrimaryAttack(tbl)
 end
 
 function SWEP:Think_ProcessSecondaryAttack(tbl)
-	if self:Clip2() ~= -1 and self:Ammo2() ~= 0 then
+	--[[if self:Clip2() ~= -1 and self:Ammo2() ~= 0 then
 		tbl.m_bFireOnEmpty = true
-	end
+	end--]]
 
 	self:SecondaryAttack()
 	return true
@@ -544,4 +542,6 @@ end
 
 function SWEP:PrimaryAttack()
 	-- Derived classes should implement this and call CSBaseGunFire.
+end
+function SWEP:SecondaryAttack()
 end

@@ -42,8 +42,7 @@ hook.Add("PopulateWeapons", "swsrc.spawnmenu", function(pnlContent, tree)
 			local subcat = WEAPONTYPE_UNKNOWN
 
 			if swep then
-				local kv = util.KeyValuesToTable(swep.WeaponData or "", false, true)
-				subcat = swsrc.WeaponClassFromString(kv.WeaponType or "")
+				subcat = swep.CSWpnData.m_WeaponType or WEAPONTYPE_UNKNOWN
 			end
 
 			if categoryMap[subcat] then

@@ -194,8 +194,8 @@ function SWEP:FX_FireBullets(iMode, flCurAttack)
 
 	-- the RNG can be desynchronized by FireBullet(), so pre-generate all spread offsets
 	for iBullet = 1, iBullets do
-		local fTheta1 = util.SharedRandom("", 0, 2 * math.pi)
-		local fRadius1 = util.SharedRandom("", 0, fSpread)
+		local fTheta1 = util.SharedRandom("", 0, 2 * math.pi, iBullet)
+		local fRadius1 = util.SharedRandom("", 0, fSpread, iBullet)
 		x1[iBullet] = fRadius1 * math.cos(fTheta1)
 		y1[iBullet] = fRadius1 * math.sin(fTheta1)
 	end

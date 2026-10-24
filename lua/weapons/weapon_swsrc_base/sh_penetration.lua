@@ -139,9 +139,7 @@ function SWEP:CS_FireBullet(vecSrc, shootAngles, flDistance, iPenetration, iBull
 	end
 
 	-- add the spray
-	local vecDir = Vector(vecDirShooting)
-	vecDir:Add(vecRight * xSpread)
-	vecDir:Add(vecUp * ySpread)
+	local vecDir = vecDirShooting + xSpread * vecRight + ySpread * vecUp
 	vecDir:Normalize()
 
 	local iPenetrationKills = 0
@@ -192,6 +190,7 @@ function SWEP:CS_FireBullet(vecSrc, shootAngles, flDistance, iPenetration, iBull
 		hook.Run("SWCSPenetratationIgnoreEntities", self, owner, traceData.filter)
 
 		util.TraceLine(traceData)
+		-- TODO?: rayExtension = 40, ClipTraceToPlayers
 
 		-- we didn't hit anything, stop tracing shoot
 		if tr.Fraction == 1 then break end

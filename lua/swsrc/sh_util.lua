@@ -156,7 +156,7 @@ local function makeModeValues(pKeyValuesData, key, default)
 	}
 end
 function swsrc.ParseWeaponData(WeaponData)
-	local pKeyValuesData = swsrc.KeyValuesHelper(WeaponData or "", false, true)
+	local pKeyValuesData = swsrc.KeyValuesHelper(WeaponData or "", false, false)
 	if not pKeyValuesData then return {} end
 
 	local data = {
@@ -177,9 +177,9 @@ function swsrc.ParseWeaponData(WeaponData)
 		bShowUsageHint            = pKeyValuesData:GetBool("showusagehint", false),
 		bAutoSwitchTo             = pKeyValuesData:GetBool("autoswitchto", true),
 		bAutoSwitchFrom           = pKeyValuesData:GetBool("autoswitchfrom", true),
-		m_bBuiltRightHanded       = pKeyValuesData:GetBool("BuiltRightHanded", true),
-		m_bAllowFlipping          = pKeyValuesData:GetBool("AllowFlipping", true),
-		m_bMeleeWeapon            = pKeyValuesData:GetBool("MeleeWeapon", false),
+		m_bBuiltRightHanded       = pKeyValuesData:GetBool("builtrighthanded", true),
+		m_bAllowFlipping          = pKeyValuesData:GetBool("allowflipping", true),
+		m_bMeleeWeapon            = pKeyValuesData:GetBool("meleeweapon", false),
 
 		szAmmo1                   = pKeyValuesData:GetString("primary_ammo", "None"),
 		szAmmo2                   = pKeyValuesData:GetString("secondary_ammo", "None"),
@@ -189,61 +189,61 @@ function swsrc.ParseWeaponData(WeaponData)
 
 		-- vvv CS:S specific vvv --
 
-		m_flMaxSpeed              = pKeyValuesData:GetInt("MaxPlayerSpeed", 1),
+		m_flMaxSpeed              = pKeyValuesData:GetInt("maxplayerspeed", 1),
 
-		m_iWeaponPrice            = pKeyValuesData:GetInt("WeaponPrice", -1),
+		m_iWeaponPrice            = pKeyValuesData:GetInt("weaponprice", -1),
 
-		m_flArmorRatio            = pKeyValuesData:GetFloat("WeaponArmorRatio", 1),
-		m_iCrosshairMinDistance   = pKeyValuesData:GetInt("CrosshairMinDistance", 4),
-		m_iCrosshairDeltaDistance = pKeyValuesData:GetInt("CrosshairDeltaDistance", 3),
-		m_bCanUseWithShield       = pKeyValuesData:GetBool("CanEquipWithShield", false),
-		m_flMuzzleScale           = pKeyValuesData:GetFloat("MuzzleFlashScale", 1),
+		m_flArmorRatio            = pKeyValuesData:GetFloat("weaponarmorratio", 1),
+		m_iCrosshairMinDistance   = pKeyValuesData:GetInt("crosshairmindistance", 4),
+		m_iCrosshairDeltaDistance = pKeyValuesData:GetInt("crosshairdeltadistance", 3),
+		m_bCanUseWithShield       = pKeyValuesData:GetBool("canequipwithshield", false),
+		m_flMuzzleScale           = pKeyValuesData:GetFloat("muzzleflashscale", 1),
 
-		m_iPenetration            = pKeyValuesData:GetInt("Penetration", 1),
-		m_iDamage                 = pKeyValuesData:GetInt("Damage", 42), -- Douglas Adams 1952 - 2001
-		m_flRange                 = pKeyValuesData:GetFloat("Range", 8192),
-		m_flRangeModifier         = pKeyValuesData:GetFloat("RangeModifier", 0.98),
-		m_iBullets                = pKeyValuesData:GetInt("Bullets", 1),
-		m_flCycleTime             = pKeyValuesData:GetFloat("CycleTime", 0.15),
-		m_bAccuracyQuadratic      = pKeyValuesData:GetBool("AccuracyQuadratic", false),
-		m_flAccuracyDivisor       = pKeyValuesData:GetFloat("AccuracyDivisor", -1), -- -1 = off
-		m_flAccuracyOffset        = pKeyValuesData:GetFloat("AccuracyOffset", 0),
-		m_flMaxInaccuracy         = pKeyValuesData:GetFloat("MaxInaccuracy", 0),
+		m_iPenetration            = pKeyValuesData:GetInt("penetration", 1),
+		m_iDamage                 = pKeyValuesData:GetInt("damage", 42), -- Douglas Adams 1952 - 2001
+		m_flRange                 = pKeyValuesData:GetFloat("range", 8192),
+		m_flRangeModifier         = pKeyValuesData:GetFloat("rangemodifier", 0.98),
+		m_iBullets                = pKeyValuesData:GetInt("bullets", 1),
+		m_flCycleTime             = pKeyValuesData:GetFloat("cycletime", 0.15),
+		m_bAccuracyQuadratic      = pKeyValuesData:GetBool("accuracyquadratic", false),
+		m_flAccuracyDivisor       = pKeyValuesData:GetFloat("accuracydivisor", -1), -- -1 = off
+		m_flAccuracyOffset        = pKeyValuesData:GetFloat("accuracyoffset", 0),
+		m_flMaxInaccuracy         = pKeyValuesData:GetFloat("maxinaccuracy", 0),
 
 		-- new accuracy model parameters
-		m_fSpread                 = makeModeValues(pKeyValuesData, "Spread", 0),
-		m_fInaccuracyCrouch       = makeModeValues(pKeyValuesData, "InaccuracyCrouch", 0),
-		m_fInaccuracyStand        = makeModeValues(pKeyValuesData, "InaccuracyStand", 0),
-		m_fInaccuracyJump         = makeModeValues(pKeyValuesData, "InaccuracyJump", 0),
-		m_fInaccuracyLand         = makeModeValues(pKeyValuesData, "InaccuracyLand", 0),
-		m_fInaccuracyLadder       = makeModeValues(pKeyValuesData, "InaccuracyLadder", 0),
-		m_fInaccuracyImpulseFire  = makeModeValues(pKeyValuesData, "InaccuracyImpulseFire", 0),
-		m_fInaccuracyMove         = makeModeValues(pKeyValuesData, "InaccuracyMove", 0),
+		m_fSpread                 = makeModeValues(pKeyValuesData, "spread", 0),
+		m_fInaccuracyCrouch       = makeModeValues(pKeyValuesData, "inaccuracycrouch", 0),
+		m_fInaccuracyStand        = makeModeValues(pKeyValuesData, "inaccuracystand", 0),
+		m_fInaccuracyJump         = makeModeValues(pKeyValuesData, "inaccuracyjump", 0),
+		m_fInaccuracyLand         = makeModeValues(pKeyValuesData, "inaccuracyland", 0),
+		m_fInaccuracyLadder       = makeModeValues(pKeyValuesData, "inaccuracyladder", 0),
+		m_fInaccuracyImpulseFire  = makeModeValues(pKeyValuesData, "inaccuracyimpulsefire", 0),
+		m_fInaccuracyMove         = makeModeValues(pKeyValuesData, "inaccuracymove", 0),
 
-		m_fInaccuracyReload       = pKeyValuesData:GetFloat("InaccuracyReload", 0),
-		m_fInaccuracyAltSwitch    = pKeyValuesData:GetFloat("InaccuracyAltSwitch", 0),
+		m_fInaccuracyReload       = pKeyValuesData:GetFloat("inaccuracyreload", 0),
+		m_fInaccuracyAltSwitch    = pKeyValuesData:GetFloat("inaccuracyaltswitch", 0),
 
-		m_fRecoveryTimeCrouch     = pKeyValuesData:GetFloat("RecoveryTimeCrouch", 1),
-		m_fRecoveryTimeStand      = pKeyValuesData:GetFloat("RecoveryTimeStand", 1),
+		m_fRecoveryTimeCrouch     = pKeyValuesData:GetFloat("recoverytimecrouch", 1),
+		m_fRecoveryTimeStand      = pKeyValuesData:GetFloat("recoverytimestand", 1),
 
-		m_flTimeToIdleAfterFire   = pKeyValuesData:GetFloat("TimeToIdle", 2),
-		m_flIdleInterval          = pKeyValuesData:GetFloat("IdleInterval", 20),
+		m_flTimeToIdleAfterFire   = pKeyValuesData:GetFloat("timetoidle", 2),
+		m_flIdleInterval          = pKeyValuesData:GetFloat("idleinterval", 20),
 
 		m_iTeam                   = -1, -- dont care currently
 
-		m_WrongTeamMsg            = pKeyValuesData:GetString("WrongTeamMsg", ""),
+		m_WrongTeamMsg            = pKeyValuesData:GetString("wrongteammsg", ""),
 		m_szShieldViewModel       = pKeyValuesData:GetString("shieldviewmodel", ""),
-		m_szAnimExtension         = pKeyValuesData:GetString("PlayerAnimationExtension", "m4"),
+		m_szAnimExtension         = pKeyValuesData:GetString("playeranimationextension", "m4"),
 
-		m_flBotAudibleRange       = pKeyValuesData:GetFloat("BotAudibleRange", 2000),
+		m_flBotAudibleRange       = pKeyValuesData:GetFloat("botaudiblerange", 2000),
 
-		m_WeaponType              = swsrc.WeaponClassFromString(pKeyValuesData:GetString("WeaponType", "")),
+		m_WeaponType              = swsrc.WeaponClassFromString(pKeyValuesData:GetString("weapontype", "")),
 
-		m_bFullAuto               = pKeyValuesData:GetBool("FullAuto"),
+		m_bFullAuto               = pKeyValuesData:GetBool("fullauto"),
 
-		m_szAddonModel            = pKeyValuesData:GetString("AddonModel"),
-		m_szDroppedModel          = pKeyValuesData:GetString("DroppedModel"),
-		m_szSilencerModel         = pKeyValuesData:GetString("SilencerModel"),
+		m_szAddonModel            = pKeyValuesData:GetString("addonmodel"),
+		m_szDroppedModel          = pKeyValuesData:GetString("droppedmodel"),
+		m_szSilencerModel         = pKeyValuesData:GetString("silencermodel"),
 	}
 
 	data.iDefaultClip1 = pKeyValuesData:GetInt("default_clip", data.iMaxClip1)
@@ -263,7 +263,7 @@ function swsrc.ParseWeaponData(WeaponData)
 	if data.szAmmo2 == "None" then data.szAmmo2 = "" end
 	data.iAmmo2Type = game.GetAmmoID(data.szAmmo2)
 
-	local pSoundData = pKeyValuesData:FindKey("SoundData")
+	local pSoundData = pKeyValuesData:FindKey("sounddata")
 	if pSoundData then
 		for i = 1, 16 do
 			local soundname = pSoundData:GetString(pWeaponSoundCategories[i], "")
@@ -273,9 +273,9 @@ function swsrc.ParseWeaponData(WeaponData)
 		end
 	end
 
-	local pTextureSection = pKeyValuesData:FindKey("TextureData")
+	local pTextureSection = pKeyValuesData:FindKey("texturedata")
 	if pTextureSection then
-		for key, pTemp in pTextureSection:IterValues() do
+		for key, pTemp in pTextureSection:Iter() do
 			if pTemp:GetString("font", "") ~= "" then
 				data.TextureData[key] = {
 					szShortName = key,
@@ -302,7 +302,7 @@ function swsrc.ParseWeaponData(WeaponData)
 
 	data.m_iDefaultPrice = data.m_iWeaponPrice
 
-	local pMuzzleFlashStyle = pKeyValuesData:GetString("MuzzleFlashStyle", "CS_MUZZLEFLASH_NORM")
+	local pMuzzleFlashStyle = pKeyValuesData:GetString("muzzleflashstyle", "CS_MUZZLEFLASH_NORM")
 	if pMuzzleFlashStyle == "CS_MUZZLEFLASH_X" then
 		data.m_iMuzzleFlashStyle = 1
 	elseif pMuzzleFlashStyle == "CS_MUZZLEFLASH_NONE" then

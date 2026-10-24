@@ -121,6 +121,10 @@ function SWEP:OverrideData(tbl)
 	tbl.SlotPos = 0
 end
 
+function SWEP:GetWeaponID()
+	return WEAPON_KNIFE
+end
+
 local HEAD_HULL_MINS = Vector(-16, -16, -18)
 local HEAD_HULL_MAXS = Vector(16, 16, 18)
 local VEC_DUCK_HULL_MIN = Vector(-16, -16, 0)
@@ -466,8 +470,4 @@ function SWEP:ProcessExtraActivities(tbl)
 		selfTable.Smack(self)
 		selfTable.SetSmackTime(self, -1)
 	end
-end
-
-function SWEP:GetWeaponID()
-	return WEAPON_KNIFE
 end
