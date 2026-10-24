@@ -1,6 +1,6 @@
 include("shared.lua")
 
-local xhair_enabled = GetConVar("swsrc_crosshair")
+local crosshair = GetConVar("swsrc_crosshair")
 local cl_dynamiccrosshair = GetConVar("swsrc_dynamiccrosshair")
 local cl_crosshairspreadscale = GetConVar("swsrc_crosshairscale")
 local cl_crosshairscale = GetConVar("swsrc_crosshairscale")
@@ -21,6 +21,8 @@ local weapon_debug_spread_gap = GetConVar("swsrc_debug_spread_gap")
 local cl_legacy_crosshair_recoil = GetConVar("swsrc_legacy_crosshair_recoil")
 local cl_legacy_crosshair_scale = GetConVar("swsrc_legacy_crosshair_scale")
 
+local clean_scope = GetConVar("swsrc_clean_scope")
+
 local SWITCH_color = {
 	[0] = {50, 250, 50},
 	{250, 50,  50},
@@ -37,9 +39,88 @@ local function DrawCrosshairRect(x0, y0, x1, y1, bAdditive)
 	end
 end
 
+local m_iCrosshairTextureID = surface.GetTextureID("vgui/white_additive")
+local m_iScopeArcTexture = surface.GetTextureID("sprites/scope_arc")
+local m_iScopeDustTexture = surface.GetTextureID("overlays/scope_lens")
+
+function SWEP:DrawScope(x, y)
+	local sw, sh = ScrW(), ScrH()
+
+	local inset = sh / 16
+	local ow = (sh / 2) - inset
+	local y1 = y - ow
+	local y2 = y + ow
+	local x1 = x - ow
+	local x2 = x + ow
+
+	local uv1 = 0.5 / 256
+	local uv2 = 1 - uv1
+
+	local vert = {}
+
+	local xMod = sw / 2
+	local yMod = sh / 2
+
+	local iMiddleX = x --sw / 2
+	local iMiddleY = y --sh / 2
+
+	if not clean_scope:GetBool() then
+		surface.SetTexture(m_iScopeDustTexture)
+		surface.SetDrawColor(255, 255, 255, 255)
+
+		vert[1] = {x = iMiddleX + xMod, y = iMiddleY + yMod, u = uv2, v = uv1}
+		vert[2] = {x = iMiddleX - xMod, y = iMiddleY + yMod, u = uv1, v = uv1}
+		vert[3] = {x = iMiddleX - xMod, y = iMiddleY - yMod, u = uv1, v = uv2}
+		vert[4] = {x = iMiddleX + xMod, y = iMiddleY - yMod, u = uv2, v = uv2}
+		surface.DrawPoly(vert)
+	end
+
+	surface.SetDrawColor(0, 0, 0, 255)
+
+	-- Draw the reticle with primitives
+	surface.DrawLine(0, y, sw, y)
+	surface.DrawLine(x, 0, x, sh)
+
+	-- Draw the outline
+	surface.SetTexture(m_iScopeArcTexture)
+
+	-- bottom right
+	vert[1] = {x = x, y = y, u = uv1, v = uv1}
+	vert[2] = {x = x2, y = y, u = uv2, v = uv1}
+	vert[3] = {x = x2, y = y2, u = uv2, v = uv2}
+	vert[4] = {x = x, y = y2, u = uv1, v = uv2}
+	surface.DrawPoly(vert)
+
+	-- top right
+	vert[1] = {x = x - 1, y = y1, u = uv1, v = uv2}
+	vert[2] = {x = x2, y = y1, u = uv2, v = uv2}
+	vert[3] = {x = x2, y = y + 1, u = uv2, v = uv1}
+	vert[4] = {x = x - 1, y = y + 1, u = uv1, v = uv1}
+	surface.DrawPoly(vert)
+
+	-- bottom left
+	vert[1] = {x = x1, y = y, u = uv2, v = uv1}
+	vert[2] = {x = x, y = y, u = uv1, v = uv1}
+	vert[3] = {x = x, y = y2, u = uv1, v = uv2}
+	vert[4] = {x = x1, y = y2, u = uv2, v = uv2}
+	surface.DrawPoly(vert)
+
+	-- top left
+	vert[1] = {x = x1, y = y1, u = uv2, v = uv2}
+	vert[2] = {x = x, y = y1, u = uv1, v = uv2}
+	vert[3] = {x = x, y = y, u = uv1, v = uv1}
+	vert[4] = {x = x1, y = y, u = uv2, v = uv1}
+	surface.DrawPoly(vert)
+
+	surface.DrawRect(0, 0, sw, y1) -- top
+	surface.DrawRect(0, y2, sw, sh) -- bottom
+	surface.DrawRect(0, y1, x1, sh) -- left
+	surface.DrawRect(x2, y1, sw, sh) -- right
+end
+
 SWEP.m_iAmmoLastCheck = 0
 function SWEP:DoDrawCrosshair(x, y)
-	if not xhair_enabled:GetBool() then return end
+	if not crosshair:GetBool() then return end
 
 	local selfTable = self:GetTable()
 
@@ -47,6 +128,10 @@ function SWEP:DoDrawCrosshair(x, y)
 	if not owner then return end
 
 	assert(owner == LocalPlayer() or LocalPlayer():GetObserverMode() == OBS_MODE_IN_EYE)
+
+	if owner:IsWorldClicking() then
+		x, y = input.GetCursorPos()
+	end
 
 	local col = cl_crosshaircolor:GetInt()
 	local r, g, b = unpack(SWITCH_color[col] or SWITCH_color[0])
@@ -63,21 +148,23 @@ function SWEP:DoDrawCrosshair(x, y)
 	local alpha = math.Clamp(cl_crosshairalpha:GetInt(), 0, 255)
 	surface.SetDrawColor(r, g, b, alpha)
 
-	if not selfTable.m_iCrosshairTextureID then
-		selfTable.m_iCrosshairTextureID = surface.GetTextureID("vgui/white_additive")
-	end
-
 	if not bAdditive then
 		surface.SetDrawColor(r, g, b, 200)
-		surface.SetTexture(selfTable.m_iCrosshairTextureID)
+		surface.SetTexture(m_iCrosshairTextureID)
 	end
 
 	local wdat = selfTable.CSWpnData
 
+	if wdat.m_WeaponType == WEAPONTYPE_SNIPER_RIFLE and math.floor(owner:GetFOV()) ~= owner:GetDefaultFOV() then
+		selfTable.DrawScope(self, x, y)
+
+		return true
+	end
+
 	local bCrosshairVisible = wdat.m_WeaponType ~= WEAPONTYPE_SNIPER_RIFLE
 	if not bCrosshairVisible and not weapon_debug_spread_show:GetBool() then return true end
 
-	local fHalfFov = math.rad(owner:GetFOV())
+	local fHalfFov = math.rad(math.floor(owner:GetFOV()))
 
 	local m_flCrosshairDistance = 0
 	local iCrosshairDistance = 0

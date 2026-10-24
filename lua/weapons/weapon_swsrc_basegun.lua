@@ -3,8 +3,6 @@ AddCSLuaFile()
 SWEP.Base = "weapon_swsrc_base"
 DEFINE_BASECLASS(SWEP.Base)
 
-local g_bSinglePlayer = game.SinglePlayer()
-
 function SWEP:SetupDataTables()
 	BaseClass.SetupDataTables(self)
 
@@ -35,12 +33,13 @@ function SWEP:ProcessExtraActivities(selfTable)
 
 	-- Return zoom level back to previous zoom level before we fired a shot. This is used only for the AWP and Scout.
 	if self:GetNextPrimaryFire() <= CurTime() and selfTable.GetResumeZoom(self) then
-		selfTable.GetResumeZoom(false)
+		selfTable.SetResumeZoom(self, false)
 
 		if self:Clip1() ~= 0 or bit.band(selfTable.GetWeaponFlags(self, selfTable), ITEM_FLAG_NOAUTORELOAD) ~= 0 then
 			selfTable.SetWeaponMode(self, Secondary_Mode)
+			self:SetHoldType("rpg")
 			owner:SetFOV(selfTable.GetLastZoom(self), 0.05)
-			selfTable.SetZoomFullyActiveTime(CurTime() + 0.05)
+			selfTable.SetZoomFullyActiveTime(self, CurTime() + 0.05)
 		end
 	end
 end
@@ -100,7 +99,7 @@ function SWEP:CSBaseGunFire(flCycleTime, weaponMode)
 
 	selfTable.SetWeaponIdleTime(self, CurTime() + pCSInfo.m_flTimeToIdleAfterFire)
 
-	selfTable.SetAccuracyPenalty(self, selfTable.SetAccuracyPenalty(self) + pCSInfo.m_fInaccuracyImpulseFire[weaponMode])
+	selfTable.SetAccuracyPenalty(self, selfTable.GetAccuracyPenalty(self) + pCSInfo.m_fInaccuracyImpulseFire[weaponMode])
 
 	return true
 end
@@ -118,8 +117,9 @@ function SWEP:FX_FireBullets(iMode, flCurAttack)
 
 	local bDoEffects = true
 
-	local vOrigin = owner:GetShootPos()
-	local vAngles = owner:EyeAngles() + 2 * owner:GetViewPunchAngles()
+	local vOrigin = owner.m_vSavedShootPos or owner:GetShootPos()
+	local vAngles = owner:GetAimVector():Angle() + (2 * owner:GetViewPunchAngles())
+	vAngles:Normalize()
 	local iWeaponID = selfTable.GetWeaponID(self)
 	local fInaccuracy = selfTable.GetInaccuracy(self)
 	local fSpread = selfTable.GetSpread(self)
@@ -147,7 +147,7 @@ function SWEP:FX_FireBullets(iMode, flCurAttack)
 
 	local pWeaponInfo = selfTable.CSWpnData
 
-	owner:DoCustomAnimEvent(iMode == Primary_Mode and PLAYERANIMEVENT_ATTACK_PRIMARY or PLAYERANIMEVENT_ATTACK_SECONDARY)
+	owner:DoCustomAnimEvent(iMode == Primary_Mode and PLAYERANIMEVENT_ATTACK_PRIMARY or PLAYERANIMEVENT_ATTACK_SECONDARY, 0)
 
 	if SERVER then
 		bDoEffects = false
@@ -199,7 +199,7 @@ function SWEP:FX_FireBullets(iMode, flCurAttack)
 	end
 
 	for iBullet = 1, iBullets do
-		selfTable.CS_FireBullet(
+		selfTable.CS_FireBullet(self,
 			vOrigin,
 			vAngles,
 			flRange,
@@ -223,16 +223,15 @@ function SWEP:Reload()
 
 	if owner:GetAmmoCount(self:GetPrimaryAmmoType()) <= 0 then return false end
 
-	local defaultFov = owner:GetDefaultFOV()
-	owner:SetFOV(defaultFov, 0)
+	owner:SetFOV(0, 0)
 
 	local iResult = self:DefaultReload(ACT_VM_RELOAD)
 	if not iResult then return false end
 
 	owner:SetAnimation(PLAYER_RELOAD)
 
-	if iResult and owner:GetFOV() ~= defaultFov then
-		owner:SetFOV(defaultFov)
+	if iResult and math.floor(owner:GetFOV()) ~= owner:GetDefaultFOV() then
+		owner:SetFOV(0)
 	end
 
 	selfTable.SetAccuracy(self, 0.2)
@@ -249,7 +248,7 @@ function SWEP:WeaponIdle(tbl)
 
 	-- only idle if the slid isn't back
 	if self:Clip1() ~= 0 then
-		selfTable.SetWeaponIdleTime(CurTime() + selfTable.CSWpnData.m_flIdleInterval)
+		selfTable.SetWeaponIdleTime(self, CurTime() + selfTable.CSWpnData.m_flIdleInterval)
 		selfTable.SetWeaponAnim(self, ACT_VM_IDLE)
 	end
 end

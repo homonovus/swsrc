@@ -26,8 +26,12 @@ if CLIENT then
 		"Enable legacy framerate dependent crosshair recoil")
 	CreateClientConVar("swsrc_legacy_crosshair_scale", "0", true, false, "Enable legacy crosshair scaling")
 
+	CreateClientConVar("swsrc_clean_scope", "0", true)
+
 	CreateClientConVar("swsrc_use_headbob", "1", true)
 end
+
+CreateConVar("sv_showimpacts_time", "4", FCVAR_REPLICATED, "Duration bullet impact indicators remain before disappearing")
 
 CreateConVar("swsrc_weapon_accuracy_model", "2", bit.bor(FCVAR_REPLICATED, FCVAR_ARCHIVE))
 CreateConVar("swsrc_weapon_accuracy_logging", "0", bit.bor(FCVAR_REPLICATED, FCVAR_ARCHIVE))

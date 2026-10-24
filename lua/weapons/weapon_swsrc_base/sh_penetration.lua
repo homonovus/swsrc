@@ -1,7 +1,6 @@
 AddCSLuaFile()
 
 local sv_showimpacts = GetConVar("sv_showimpacts")
-local sv_showimpacts_penetration = GetConVar("sv_showimpacts_penetration")
 local sv_showimpacts_time = GetConVar("sv_showimpacts_time")
 local phys_pushscale = GetConVar("phys_pushscale")
 
@@ -82,6 +81,7 @@ CS_MASK_SHOOT = bit.bor(MASK_SOLID, CONTENTS_DEBRIS)
 local IMPACT_MAXS = Vector(2, 2, 2)
 local IMPACT_MINS = IMPACT_MAXS * -1
 local IMPACT_COLOR = CLIENT and Color(255, 0, 0, 127) or Color(0, 0, 255, 127)
+local MAT_IMPACT = Material(util.DecalMaterial("Impact.Concrete"))
 
 local function TraceToExit(start, dir, endpos, flStepSize, flMaxDistance)
 	local flDistance = 0
@@ -139,12 +139,14 @@ function SWEP:CS_FireBullet(vecSrc, shootAngles, flDistance, iPenetration, iBull
 	end
 
 	-- add the spray
-	local vecDir = vecDirShooting + xSpread * vecRight + ySpread * vecUp
+	local vecDir = Vector(vecDirShooting)
+	vecDir:Add(vecRight * xSpread)
+	vecDir:Add(vecUp * ySpread)
 	vecDir:Normalize()
 
 	local iPenetrationKills = 0
 
-	local bFirstHit = true
+	--local bFirstHit = true
 	local lastPlayerHit = NULL
 
 	local tr = {}
@@ -180,8 +182,7 @@ function SWEP:CS_FireBullet(vecSrc, shootAngles, flDistance, iPenetration, iBull
 	while fCurrentDamage > 0 do
 		traceData.start:Set(vecSrc)
 		traceData.endpos:Set(vecSrc)
-		traceData.endpos:Add(vecDir)
-		traceData.endpos:Mul(flDistance)
+		traceData.endpos:Add(vecDir * flDistance)
 
 		if lastPlayerHit:IsValid() then
 			table.insert(traceData.filter, lastPlayerHit)
@@ -201,7 +202,7 @@ function SWEP:CS_FireBullet(vecSrc, shootAngles, flDistance, iPenetration, iBull
 			break
 		end
 
-		bFirstHit = false
+		--bFirstHit = false
 
 		local pSurfaceData = util.GetSurfaceData(tr.SurfaceProps)
 		local iEnterMaterial = pSurfaceData.material
@@ -237,7 +238,7 @@ function SWEP:CS_FireBullet(vecSrc, shootAngles, flDistance, iPenetration, iBull
 
 		if bDoEffects then
 			-- See if the bullet ended up underwater + started out of the water
-			if bit.band(util.GetPointContents(tr.HitPos), bit.bor(CONTENTS_WATER, CONTENTS_SLIME)) ~= 0 then
+			if bit.band(util.PointContents(tr.HitPos), bit.bor(CONTENTS_WATER, CONTENTS_SLIME)) ~= 0 then
 				waterTraceData.start:Set(vecSrc)
 				waterTraceData.endpos:Set(tr.HitPos)
 				util.TraceLine(waterTraceData)
@@ -261,13 +262,40 @@ function SWEP:CS_FireBullet(vecSrc, shootAngles, flDistance, iPenetration, iBull
 				if bit.band(tr.SurfaceFlags, bit.bor(SURF_SKY, SURF_NODRAW, SURF_HINT, SURF_SKIP)) == 0 then
 					-- UTIL_ImpactTrace
 					if tr.Fraction ~= 1 then
+						local ent = tr.Entity
+
 						local data = EffectData()
 						data:SetOrigin(tr.HitPos)
 						data:SetStart(tr.StartPos)
 						data:SetSurfaceProp(tr.SurfaceProps)
 						data:SetDamageType(iDamageType)
 						data:SetHitBox(tr.HitBox)
-						data:SetEntity(tr.Entity)
+						data:SetEntity(ent)
+
+						if
+							(CLIENT and IsFirstTimePredicted())
+							and (ent:IsWorld() or (ent:IsValid() and not (ent:IsPlayer() or ent:IsNPC() or ent:IsNextBot())))
+						then
+							local normal = Vector(tr.Normal)
+
+							if tr.HitNormal.z == 0 then
+								normal.z = 0
+								normal:Normalize()
+							end
+
+							local planeRight = normal:Cross(-vector_up)
+							local planeForward = planeRight:Cross(vector_up)
+
+							local decalAngle = planeForward:AngleEx(vector_up)
+							local decalNormal = decalAngle:Forward()
+
+							if tr.HitNormal.z ~= 0 then
+								decalNormal:Set(planeRight)
+							end
+
+							util.DecalEx(MAT_IMPACT, ent, tr.HitPos, decalNormal, color_white, 1, 1)
+						end
+
 						util.Effect("Impact_GMOD", data, not game.SinglePlayer())
 					end
 				end
@@ -299,7 +327,7 @@ function SWEP:CS_FireBullet(vecSrc, shootAngles, flDistance, iPenetration, iBull
 
 			pEntity:DispatchTraceAttack(info, tr)
 
-			if bWasAlive and not pEntity:IsAlive() and pEntity:IsPlayer() then
+			if bWasAlive and not pEntity:Alive() and pEntity:IsPlayer() then
 				iPenetrationKills = iPenetrationKills + 1
 			end
 		end
@@ -351,13 +379,40 @@ function SWEP:CS_FireBullet(vecSrc, shootAngles, flDistance, iPenetration, iBull
 		if bDoEffects then
 			-- UTIL_ImpactTrace
 			if bit.band(exitTr.SurfaceFlags, bit.bor(SURF_SKY, SURF_NODRAW)) == 0 and exitTr.Fraction ~= 1 then
+				local ent = exitTr.Entity
+
 				local data = EffectData()
 				data:SetOrigin(exitTr.HitPos)
 				data:SetStart(exitTr.StartPos)
 				data:SetSurfaceProp(exitTr.SurfaceProps)
 				data:SetDamageType(iDamageType)
 				data:SetHitBox(exitTr.HitBox)
-				data:SetEntity(exitTr.Entity)
+				data:SetEntity(ent)
+
+				if
+					(CLIENT and IsFirstTimePredicted())
+					and (ent:IsWorld() or (ent:IsValid() and not (ent:IsPlayer() or ent:IsNPC() or ent:IsNextBot())))
+				then
+					local normal = Vector(exitTr.Normal)
+
+					if exitTr.HitNormal.z == 0 then
+						normal.z = 0
+						normal:Normalize()
+					end
+
+					local planeRight = normal:Cross(-vector_up)
+					local planeForward = planeRight:Cross(vector_up)
+
+					local decalAngle = planeForward:AngleEx(vector_up)
+					local decalNormal = decalAngle:Forward()
+
+					if exitTr.HitNormal.z ~= 0 then
+						decalNormal:Set(planeRight)
+					end
+
+					util.DecalEx(MAT_IMPACT, ent, exitTr.HitPos, decalNormal, color_white, 1, 1)
+				end
+
 				util.Effect("Impact_GMOD", data, not game.SinglePlayer())
 			end
 		end

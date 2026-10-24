@@ -1,7 +1,9 @@
 AddCSLuaFile()
 
 SWEP.Base = "weapon_swsrc_base"
-SWEP.Category = "Counter-Strike: Source"
+DEFINE_BASECLASS(SWEP.Base)
+
+SWEP.Category = "#spawnmenu.category.swsrc"
 
 SWEP.PrintName = "Knife"
 SWEP.Spawnable = true
@@ -110,15 +112,14 @@ SWEP.WeaponData = [=[WeaponData
 	}
 }]=]
 
-SWEP.Primary.ClipSize = -1
-SWEP.Primary.DefaultClip = -1
-SWEP.Primary.Ammo = "none"
-SWEP.Secondary.Automatic = true
+function SWEP:OverrideData(tbl)
+	tbl.Primary.Automatic = true
+	tbl.Secondary.Automatic = true
 
-SWEP.Slot = 0
-SWEP.SlotPos = 0
-
-DEFINE_BASECLASS(SWEP.Base)
+	-- TODO: cvar for cs:s slots?
+	tbl.Slot = 0
+	tbl.SlotPos = 0
+end
 
 local HEAD_HULL_MINS = Vector(-16, -16, -18)
 local HEAD_HULL_MAXS = Vector(16, 16, 18)
@@ -327,7 +328,7 @@ function SWEP:SwingOrStab(bStab)
 	local fRange = bStab and 32 or 48
 
 	local vForward = owner:EyeAngles():Forward()
-	local vecSrc = owner:GetShootPos()
+	local vecSrc = owner.m_vSavedShootPos or owner:GetShootPos()
 	local vecEnd = vecSrc + vForward * fRange
 
 	local filter = filter_IgnoreOwner(owner, IGNORE_SHIELD)
@@ -463,4 +464,8 @@ function SWEP:ProcessExtraActivities(tbl)
 		selfTable.Smack(self)
 		selfTable.SetSmackTime(self, -1)
 	end
+end
+
+function SWEP:GetWeaponID()
+	return WEAPON_KNIFE
 end
