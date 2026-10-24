@@ -465,7 +465,9 @@ do -- weapon selection
 				if glow then
 					surface.SetFont(File .. "_glow")
 					surface.DrawText(character)
+
 					surface.SetFont(File)
+					surface.SetTextPos(x + ((w / 2) - (cw / 2)), y + ((h / 2) - (ch / 2)))
 				end
 
 				surface.DrawText(character)
@@ -495,6 +497,6 @@ do -- weapon selection
 	SWEP.SelectionColor = Color(255, 255, 255, 255)
 	function SWEP:DrawWeaponSelection(x, y, w, h, a)
 		self.SelectionColor.a = a
-		self:RenderTextureData("weapon_s", x, y, w, h, self.SelectionColor)
+		self:RenderTextureData("weapon_s", x, y, w, h, self.SelectionColor, true)
 	end
 end
