@@ -15,6 +15,8 @@ SWEP.UseHands = true
 
 local g_bSinglePlayer = game.SinglePlayer()
 
+include("sh_penetration.lua")
+
 hook.Add("Initialize", "swsrc.ammo", function()
 	game.AddAmmoType({
 		name = "BULLET_PLAYER_50AE",
@@ -111,6 +113,47 @@ hook.Add("Initialize", "swsrc.ammo", function()
 		maxcarry = 1,
 	})
 end)
+
+-- these are only here for custom weapons to replicate logic of other "base" weapons
+WEAPON_NONE = 0
+WEAPON_P228 = 1
+WEAPON_GLOCK = 2
+WEAPON_SCOUT = 3
+WEAPON_HEGRENADE = 4
+WEAPON_XM1014 = 5
+WEAPON_C4 = 6
+WEAPON_MAC10 = 7
+WEAPON_AUG = 8
+WEAPON_SMOKEGRENADE = 9
+WEAPON_ELITE = 10
+WEAPON_FIVESEVEN = 11
+WEAPON_UMP45 = 12
+WEAPON_SG550 = 13
+
+WEAPON_GALIL = 14
+WEAPON_FAMAS = 15
+WEAPON_USP = 16
+WEAPON_AWP = 17
+WEAPON_MP5NAVY = 18
+WEAPON_M249 = 19
+WEAPON_M3 = 20
+WEAPON_M4A1 = 21
+WEAPON_TMP = 22
+WEAPON_G3SG1 = 23
+WEAPON_FLASHBANG = 24
+WEAPON_DEAGLE = 25
+WEAPON_SG552 = 26
+WEAPON_AK47 = 27
+WEAPON_KNIFE = 28
+WEAPON_P90 = 29
+
+WEAPON_SHIELDGUN = 30 -- BOTPORT: Is this still needed?
+
+WEAPON_KEVLAR = 31
+WEAPON_ASSAULTSUIT = 32
+WEAPON_NVG = 33
+
+WEAPON_MAX = 34
 
 WEAPONTYPE_KNIFE = 0
 WEAPONTYPE_PISTOL = 1
@@ -250,7 +293,7 @@ function SWEP:ParseWeaponData()
 		m_flArmorRatio            = pKeyValuesData:GetFloat("WeaponArmorRatio", 1),
 		m_iCrosshairMinDistance   = pKeyValuesData:GetInt("CrosshairMinDistance", 4),
 		m_iCrosshairDeltaDistance = pKeyValuesData:GetInt("CrosshairDeltaDistance", 3),
-		m_bCanUseWithShield       = not not pKeyValuesData:GetInt("CanEquipWithShield", false),
+		m_bCanUseWithShield       = pKeyValuesData:GetBool("CanEquipWithShield", false),
 		m_flMuzzleScale           = pKeyValuesData:GetFloat("MuzzleFlashScale", 1),
 
 		m_iPenetration            = pKeyValuesData:GetInt("Penetration", 1),
@@ -259,7 +302,7 @@ function SWEP:ParseWeaponData()
 		m_flRangeModifier         = pKeyValuesData:GetFloat("RangeModifier", 0.98),
 		m_iBullets                = pKeyValuesData:GetInt("Bullets", 1),
 		m_flCycleTime             = pKeyValuesData:GetFloat("CycleTime", 0.15),
-		m_bAccuracyQuadratic      = pKeyValuesData:GetInt("AccuracyQuadratic", 0),
+		m_bAccuracyQuadratic      = pKeyValuesData:GetBool("AccuracyQuadratic", false),
 		m_flAccuracyDivisor       = pKeyValuesData:GetFloat("AccuracyDivisor", -1), -- -1 = off
 		m_flAccuracyOffset        = pKeyValuesData:GetFloat("AccuracyOffset", 0),
 		m_flMaxInaccuracy         = pKeyValuesData:GetFloat("MaxInaccuracy", 0),
@@ -404,6 +447,16 @@ function SWEP:IsFullAuto(tbl)
 	return selfTable.CSWpnData.m_bFullAuto
 end
 
+function SWEP:GetWeaponFlags(tbl)
+	local selfTable = tbl or self:GetTable()
+	return selfTable.CSWpnData.iFlags
+end
+
+--- Overwrite this
+function SWEP:GetWeaponID()
+	return WEAPON_NONE
+end
+
 function SWEP:PlayEmptySound(tbl)
 	local selfTable = tbl or self:GetTable()
 
@@ -434,7 +487,7 @@ function SWEP:SetWeaponAnim(idealAct, flPlaybackRate)
 end
 
 
-function SWEP:WeaponIdle()
+function SWEP:WeaponIdle(_)
 end
 
 function SWEP:Reload()
@@ -492,38 +545,38 @@ function SWEP:Think_ProcessReloadAction(_)
 end
 
 local weapon_accuracy_model = GetConVar("swsrc_weapon_accuracy_model")
-function SWEP:Think_ProcessIdleNoAction(tbl)
+function SWEP:Think_ProcessIdleNoAction(selfTable)
 	if weapon_accuracy_model:GetInt() == 2 then
-		if tbl.GetShotsFired(self) > 0 and (not tbl.IsFullAuto(self, tbl) or self:Clip1() == 0) then
-			tbl.SetShotsFired(self, 0)
+		if selfTable.GetShotsFired(self) > 0 and (not selfTable.IsFullAuto(self, selfTable) or self:Clip1() == 0) then
+			selfTable.SetShotsFired(self, 0)
 		end
 	end
 
-	if tbl.GetDelayFire(self) then
-		tbl.SetDelayFire(self, false)
+	if selfTable.GetDelayFire(self) then
+		selfTable.SetDelayFire(self, false)
 
-		if tbl.GetShotsFired(self) > 15 then
-			tbl.SetShotsFired(self, 15)
+		if selfTable.GetShotsFired(self) > 15 then
+			selfTable.SetShotsFired(self, 15)
 		end
 
-		tbl.SetDecreaseShotsFired(self, CurTime() + 0.4)
+		selfTable.SetDecreaseShotsFired(self, CurTime() + 0.4)
 	end
 
-	tbl.m_bFireOnEmpty = true
+	selfTable.m_bFireOnEmpty = true
 
-	if tbl.IsPistol(self, tbl) then
-		tbl.SetShotsFired(self, 0)
+	if selfTable.IsPistol(self, selfTable) then
+		selfTable.SetShotsFired(self, 0)
 	else
-		if tbl.GetShotsFired(self) > 0 and tbl.GetDecreaseShotsFired(self) < CurTime() then
-			tbl.SetDecreaseShotsFired(self, CurTime() + 0.0225)
-			tbl.SetShotsFired(self, tbl.GetShotsFired(self) - 1)
+		if selfTable.GetShotsFired(self) > 0 and selfTable.GetDecreaseShotsFired(self) < CurTime() then
+			selfTable.SetDecreaseShotsFired(self, CurTime() + 0.0225)
+			selfTable.SetShotsFired(self, selfTable.GetShotsFired(self) - 1)
 		end
 	end
 
-	if tbl.IsUseable(self) or self:GetNextPrimaryFire() >= CurTime() then
+	if selfTable.IsUseable(self) or self:GetNextPrimaryFire() >= CurTime() then
 		if
 			self:Clip1() == 0
-			--[[and bit.band(tbl.GetWeaponFlags(self), ITEM_FLAG_NOAUTORELOAD)]]
+			and bit.band(selfTable.GetWeaponFlags(self, selfTable), ITEM_FLAG_NOAUTORELOAD) == 0
 			and self:GetNextPrimaryFire() < CurTime()
 		then
 			self:Reload()
@@ -531,7 +584,7 @@ function SWEP:Think_ProcessIdleNoAction(tbl)
 		end
 	end
 
-	tbl.WeaponIdle(self)
+	selfTable.WeaponIdle(self, selfTable)
 end
 
 function SWEP:Think()
@@ -560,12 +613,12 @@ hook.Add("PlayerTick", "swsrc.ProcessActivities", function(ply)
 	if not IsValid(ply) then return end
 	local wep = ply:GetActiveWeapon()
 
-	local tbl = wep:GetTable()
-	if not wep:IsValid() or not weapons.IsBasedOn(tbl.ClassName, "weapon_swsrc_base") then return end
+	local wepTable = wep:GetTable()
+	if not wep:IsValid() or not weapons.IsBasedOn(wepTable.ClassName, "weapon_swsrc_base") then return end
 
-	if tbl.m_bProcessActivities then
-		tbl.ProcessActivities(wep, tbl)
-		tbl.m_bProcessActivities = false
+	if wepTable.m_bProcessActivities then
+		wepTable.ProcessActivities(wep, wepTable)
+		wepTable.m_bProcessActivities = false
 	end
 end)
 
@@ -595,7 +648,7 @@ function SWEP:ProcessActivities(tbl)
 
 	selfTable.m_bProcessingActivities = true
 
-	selfTable.ProcessExtraActivities(self, tbl)
+	selfTable.ProcessExtraActivities(self, selfTable)
 
 	local bInReload = selfTable.GetInReload(self)
 
@@ -606,7 +659,7 @@ function SWEP:ProcessActivities(tbl)
 	elseif bit.band(btns, IN_ATTACK) ~= 0 and self:GetNextPrimaryFire() <= CurTime() then
 		selfTable.Think_ProcessPrimaryAttack(self, selfTable)
 	elseif
-		bit.band(btns, IN_RELOAD)
+		bit.band(btns, IN_RELOAD) ~= 0
 		and self:GetMaxClip1() ~= -1
 		and not bInReload
 		and self:GetNextPrimaryFire() < CurTime()
@@ -650,6 +703,18 @@ function SWEP:GetMaxSpeed()
 	return self:GetTable().CSWpnData.m_flMaxSpeed
 end
 
+function SWEP:CalculateNextAttackTime(fCycleTime)
+	local fCurAttack = self:GetNextPrimaryFire()
+	local fDeltaAttack = CurTime() - fCurAttack
+	if fDeltaAttack < 0 or fDeltaAttack > engine.TickInterval() then
+		fCurAttack = CurTime()
+	end
+	self:SetNextPrimaryFire(fCurAttack + fCycleTime)
+	self:SetNextSecondaryFire(fCurAttack + fCycleTime)
+
+	return fCurAttack
+end
+
 function SWEP:Holster()
 	local selfTable = self:GetTable()
 	local owner = selfTable.GetPlayerOwner(self)
@@ -667,7 +732,7 @@ function SWEP:Deploy()
 	local selfTable = self:GetTable()
 
 	local owner = selfTable.GetPlayerOwner(self)
-	if not owner then return true end
+	if not owner then return false end
 
 	self:SetHoldType(selfTable.HoldType)
 	self:SetDeploySpeed(1) -- FIXME: cvar
@@ -691,8 +756,9 @@ function SWEP:Deploy()
 
 		local oPrim = self:GetNextPrimaryFire()
 		local oSec = self:GetNextSecondaryFire()
-		self:SetNextPrimaryFire(oPrim < self:GetWeaponIdleTime() and self:GetWeaponIdleTime() or oPrim)
-		self:SetNextSecondaryFire(oSec < self:GetWeaponIdleTime() and self:GetWeaponIdleTime() or oSec)
+		local idle = selfTable.GetWeaponIdleTime(self)
+		self:SetNextPrimaryFire(oPrim < idle and idle or oPrim)
+		self:SetNextSecondaryFire(oSec < idle and idle or oSec)
 	end
 
 	return true
@@ -744,4 +810,8 @@ function SWEP:UpdateAccuracyPenalty(tbl)
 		selfTable.SetAccuracyPenalty(self,
 			Lerp(math.exp(engine.TickInterval() * -fDecayFactor), fNewPenalty, selfTable.GetAccuracyPenalty(self)))
 	end
+end
+
+function SWEP:PrimaryAttack()
+	-- Derived classes should implement this and call CSBaseGunFire.
 end

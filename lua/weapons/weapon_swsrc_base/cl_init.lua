@@ -187,16 +187,7 @@ function SWEP:DoDrawCrosshair(x, y)
 		if spreadShow == 2 then
 			local punchAngles = owner:GetViewPunchAngles()
 			local vecDirShooting = Vector()
-			do -- inline AngleVectors (for now?)
-				local ry = math.rad(punchAngles.y)
-				local sy, cy = math.sin(ry), math.cos(ry)
-				local rp = math.rad(punchAngles.p)
-				local sp, cp = math.sin(rp), math.cos(rp)
-
-				vecDirShooting.x = cp * cy
-				vecDirShooting.y = cp * sy
-				vecDirShooting.z = -sp
-			end
+			swsrc.AngleVectors(punchAngles, vecDirShooting)
 
 			local iOffsetX = math.floor(ScreenScaleH(vecDirShooting.y * 320 / math.tan(fHalfFov)))
 			local iOffsetY = math.floor(ScreenScaleH(vecDirShooting.z * 320 / math.tan(fHalfFov)))
