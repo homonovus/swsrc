@@ -7,7 +7,7 @@ SWEP.Category = "#spawnmenu.category.swsrc"
 
 SWEP.PrintName = "Glock-18"
 SWEP.Spawnable = true
-SWEP.HoldType = "ar2"
+SWEP.HoldType = "revolver"
 SWEP.WorldModel = "models/weapons/w_pist_glock18.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_pist_glock18.mdl"
 
@@ -141,6 +141,16 @@ end
 
 function SWEP:GetWeaponID()
 	return WEAPON_GLOCK
+end
+
+function SWEP:SetupWeaponHoldTypeForAI(t)
+	-- change player holdtypes
+	self.ActivityTranslate[ACT_MP_RELOAD_STAND] = ACT_HL2MP_GESTURE_RELOAD_PISTOL
+	self.ActivityTranslate[ACT_MP_RELOAD_CROUCH] = ACT_HL2MP_GESTURE_RELOAD_PISTOL
+
+	BaseClass.SetupWeaponHoldTypeForAI(self, t)
+
+	-- change NPC holdtypes
 end
 
 local kGlockBurstCycleTime = 0.06
