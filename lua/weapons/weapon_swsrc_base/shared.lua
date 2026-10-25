@@ -512,7 +512,7 @@ function SWEP:UpdateAccuracyPenalty(tbl)
 
 	if owner:GetMoveType() == MOVETYPE_LADDER then
 		fNewPenalty = fNewPenalty + wdat.m_fInaccuracyStand[mode] + wdat.m_fInaccuracyLadder[mode]
-	elseif bit.band(owner:GetFlags(), FL_DUCKING) ~= 0 then
+	elseif owner:IsDucking() then
 		fNewPenalty = fNewPenalty + wdat.m_fInaccuracyCrouch[mode]
 	else
 		fNewPenalty = fNewPenalty + wdat.m_fInaccuracyStand[mode]
@@ -531,7 +531,7 @@ function SWEP:UpdateAccuracyPenalty(tbl)
 			fDecayFactor = math.log(10) / wdat.m_fRecoveryTimeStand
 		elseif not owner:IsOnGround() then
 			fDecayFactor = math.log(10) / (wdat.m_fRecoveryTimeCrouch * 3)
-		elseif bit.band(owner:GetFlags(), FL_DUCKING) ~= 0 then
+		elseif owner:IsDucking() then
 			fDecayFactor = math.log(10) / wdat.m_fRecoveryTimeCrouch
 		else
 			fDecayFactor = math.log(10) / wdat.m_fRecoveryTimeStand

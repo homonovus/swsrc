@@ -13,6 +13,10 @@ else
 	end
 end
 
+function PLAYER:IsDucking()
+	return bit.band(self:GetFlags(), FL_DUCKING) ~= 0
+end
+
 hook.Add("StartCommand", "swsrc.cmd", function(ply, cmd)
 	local cmd_num = cmd:CommandNumber()
 	if cmd_num ~= 0 then

@@ -111,7 +111,7 @@ local weapon_accuracy_logging = GetConVar("swsrc_weapon_accuracy_logging")
 --- This runs on both the client and the server.
 --- On the server, it only does the damage calculations.
 --- On the client, it does all the effects.
-function SWEP:FX_FireBullets(iMode, flCurAttack)
+function SWEP:FX_FireBullets(iMode, flCurAttack, fInaccuracy, fSpread)
 	local selfTable = self:GetTable()
 
 	local owner = selfTable.GetPlayerOwner(self)
@@ -123,8 +123,12 @@ function SWEP:FX_FireBullets(iMode, flCurAttack)
 	local vAngles = owner:GetAimVector():Angle() + (2 * owner:GetViewPunchAngles())
 	vAngles:Normalize()
 	local iWeaponID = selfTable.GetWeaponID(self)
-	local fInaccuracy = selfTable.GetInaccuracy(self)
-	local fSpread = selfTable.GetSpread(self)
+	if fInaccuracy == nil then
+		fInaccuracy = selfTable.GetInaccuracy(self)
+	end
+	if fSpread == nil then
+		fSpread = selfTable.GetSpread(self)
+	end
 
 	if SERVER and weapon_accuracy_logging:GetBool() then
 		local szFlags = " "
@@ -135,7 +139,7 @@ function SWEP:FX_FireBullets(iMode, flCurAttack)
 		if owner:IsOnGround() then
 			szFlags = szFlags .. "GROUND "
 		end
-		if bit.band(owner:GetFlags(), FL_DUCKING) ~= 0 then
+		if owner:IsDucking() then
 			szFlags = szFlags .. "DUCKING "
 		end
 

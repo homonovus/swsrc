@@ -190,7 +190,7 @@ do -- crosshair
 			if dynamic == 2 then
 				if not owner:IsOnGround() then
 					fCrosshairDistanceGoal = fCrosshairDistanceGoal * 2
-				elseif bit.band(owner:GetFlags(), FL_DUCKING) ~= 0 then
+				elseif owner:IsDucking() then
 					fCrosshairDistanceGoal = fCrosshairDistanceGoal * 0.5
 				elseif owner:GetVelocity():Length() > 100 then
 					fCrosshairDistanceGoal = fCrosshairDistanceGoal * 1.5

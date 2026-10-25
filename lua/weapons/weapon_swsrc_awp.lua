@@ -192,7 +192,7 @@ function SWEP:GetInaccuracy()
 			fSpread = 0.25
 		elseif vel > 10 then
 			fSpread = 0.1
-		elseif bit.band(owner:GetFlags(), FL_DUCKING) ~= 0 then
+		elseif owner:IsDucking() then
 			fSpread = 0
 		else
 			fSpread = 0.001
