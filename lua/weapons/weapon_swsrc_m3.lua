@@ -10,6 +10,7 @@ SWEP.Spawnable = true
 SWEP.HoldType = "shotgun"
 SWEP.WorldModel = "models/weapons/w_shot_m3super90.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_shot_m3super90.mdl"
+SWEP.IconOverride = "vgui/gfx/vgui/fav_weap/m3"
 
 SWEP.WeaponData = [=[WeaponData
 {
@@ -236,7 +237,12 @@ function SWEP:Reload()
 	if self:GetNextPrimaryFire() > CurTime() then return true end
 
 	if selfTable.GetReloadState(self) == 0 then
-		owner:SetAnimation(PLAYER_RELOAD)
+		if self:Clip1() < 7 then
+			selfTable.ActivityTranslate[ACT_MP_RELOAD_STAND] = ACT_HL2MP_GESTURE_RELOAD_PISTOL
+			selfTable.ActivityTranslate[ACT_MP_RELOAD_CROUCH] = ACT_HL2MP_GESTURE_RELOAD_PISTOL
+		end
+
+		--owner:SetAnimation(PLAYER_RELOAD)
 
 		selfTable.SetWeaponAnim(self, ACT_SHOTGUN_RELOAD_START)
 		selfTable.SetReloadState(self, 1)
@@ -244,7 +250,7 @@ function SWEP:Reload()
 		self:SetNextSecondaryFire(CurTime() + 0.5)
 		selfTable.SetWeaponIdleTime(self, CurTime() + 0.5)
 
-		owner:DoCustomAnimEvent(PLAYERANIMEVENT_RELOAD, 0)
+		--owner:DoCustomAnimEvent(PLAYERANIMEVENT_RELOAD, 0)
 
 		return true
 	elseif selfTable.GetReloadState(self) == 1 then
@@ -256,14 +262,16 @@ function SWEP:Reload()
 		selfTable.SetWeaponIdleTime(self, CurTime() + 0.5)
 
 		if self:Clip1() == 7 then
-			owner:DoCustomAnimEvent(PLAYERANIMEVENT_RELOAD_END, 0)
+			selfTable.ActivityTranslate[ACT_MP_RELOAD_STAND] = ACT_HL2MP_GESTURE_RELOAD_SHOTGUN
+			selfTable.ActivityTranslate[ACT_MP_RELOAD_CROUCH] = ACT_HL2MP_GESTURE_RELOAD_SHOTGUN
+			owner:DoCustomAnimEvent(PLAYERANIMEVENT_RELOAD, 0) -- was RELOAD_END
 		else
-			owner:DoCustomAnimEvent(PLAYERANIMEVENT_RELOAD_LOOP, 0)
+			owner:DoCustomAnimEvent(PLAYERANIMEVENT_RELOAD, 0) -- was RELOAD_LOOP
 		end
 	else
 		self:SetClip1(self:Clip1() + 1)
 
-		owner:DoCustomAnimEvent(PLAYERANIMEVENT_RELOAD, 0)
+		--owner:DoCustomAnimEvent(PLAYERANIMEVENT_RELOAD, 0)
 		owner:RemoveAmmo(1, self:GetPrimaryAmmoType())
 
 		selfTable.SetReloadState(self, 1)

@@ -10,6 +10,7 @@ SWEP.Spawnable = true
 SWEP.HoldType = "knife"
 SWEP.WorldModel = "models/weapons/w_knife_t.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_knife_t.mdl"
+SWEP.IconOverride = "vgui/achievements/kill_enemy_knife"
 
 SWEP.WeaponData = [=[WeaponData
 {
