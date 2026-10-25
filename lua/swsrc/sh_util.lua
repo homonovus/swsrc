@@ -152,7 +152,7 @@ end
 local function makeModeValues(pKeyValuesData, key, default)
 	return {
 		[0] = pKeyValuesData:GetFloat(key, default),
-		[1] = pKeyValuesData:GetFloat(key .. "Alt", default),
+		[1] = pKeyValuesData:GetFloat(key .. "alt", default),
 	}
 end
 function swsrc.ParseWeaponData(WeaponData)
