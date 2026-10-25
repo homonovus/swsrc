@@ -135,7 +135,6 @@ SWEP.WeaponData = [=[WeaponData
 function SWEP:OverrideData(tbl)
 	-- TODO: cvar for cs:s slots?
 	tbl.Slot = 3
-	tbl.SlotPos = 0
 end
 
 function SWEP:GetWeaponID()

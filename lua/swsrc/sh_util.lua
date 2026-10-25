@@ -87,6 +87,7 @@ local s_weaponTypeInfo = {
 	{WEAPONTYPE_KNIFE,         "Knife"},
 	{WEAPONTYPE_PISTOL,        "Pistol"},
 	{WEAPONTYPE_SUBMACHINEGUN, "Submachine Gun"}, -- First match is printable
+	{WEAPONTYPE_SUBMACHINEGUN, "SubMachinegun"},
 	{WEAPONTYPE_SUBMACHINEGUN, "submachinegun"},
 	{WEAPONTYPE_SUBMACHINEGUN, "smg"},
 	{WEAPONTYPE_RIFLE,         "Rifle"},
@@ -94,6 +95,7 @@ local s_weaponTypeInfo = {
 	{WEAPONTYPE_SNIPER_RIFLE,  "Sniper Rifle"}, -- First match is printable
 	{WEAPONTYPE_SNIPER_RIFLE,  "SniperRifle"},
 	{WEAPONTYPE_MACHINEGUN,    "Machine Gun"}, -- First match is printable
+	{WEAPONTYPE_MACHINEGUN,    "Machinegun"},
 	{WEAPONTYPE_MACHINEGUN,    "machinegun"},
 	{WEAPONTYPE_MACHINEGUN,    "mg"},
 	{WEAPONTYPE_C4,            "C4"},

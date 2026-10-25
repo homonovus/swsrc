@@ -137,7 +137,6 @@ SWEP.WeaponData = [=[WeaponData
 function SWEP:OverrideData(tbl)
 	-- TODO: cvar for cs:s slots?
 	tbl.Slot = 1
-	tbl.SlotPos = 0
 end
 
 function SWEP:GetWeaponID()
@@ -269,7 +268,7 @@ function SWEP:PrimaryAttack()
 
 	self:SetClip1(self:Clip1() - 1)
 
-	owner:MuzzleFlash()
+	selfTable.DoFireEffects(self, selfTable)
 
 	owner:SetAnimation(PLAYER_ATTACK1)
 

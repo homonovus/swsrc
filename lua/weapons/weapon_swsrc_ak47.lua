@@ -1,0 +1,178 @@
+AddCSLuaFile()
+
+SWEP.Base = "weapon_swsrc_basegun"
+DEFINE_BASECLASS(SWEP.Base)
+
+SWEP.Category = "#spawnmenu.category.swsrc"
+
+SWEP.PrintName = "AK47"
+SWEP.Spawnable = true
+SWEP.HoldType = "ar2"
+SWEP.WorldModel = "models/weapons/w_rif_ak47.mdl"
+SWEP.ViewModel = "models/weapons/cstrike/c_rif_ak47.mdl"
+SWEP.IconOverride = "vgui/gfx/vgui/fav_weap/ak47"
+
+SWEP.WeaponData = [=[WeaponData
+{
+	"MaxPlayerSpeed"		"221"
+	"WeaponType"			"Rifle"
+	"FullAuto"				1
+	"WeaponPrice"			"2500"
+	"WeaponArmorRatio"		"1.55"
+	"CrosshairMinDistance"		"4"
+	"CrosshairDeltaDistance"	"4"
+	"Team" 				"TERRORIST"
+	"BuiltRightHanded" 		"0"
+	"PlayerAnimationExtension" 	"ak"
+	"MuzzleFlashScale"		"1.6"
+	"MuzzleFlashStyle"		"CS_MUZZLEFLASH_X"
+	"CanEquipWithShield"		"0"
+
+
+	// Weapon characteristics:
+	"Penetration"			"2"
+	"Damage"			"36"
+	"Range"				"8192"
+	"RangeModifier"			"0.98"
+	"Bullets"			"1"
+	"CycleTime"			"0.1"
+	"AccuracyDivisor"		"200"
+	"AccuracyOffset"		"0.35"
+	"MaxInaccuracy"			"1.25"
+	"TimeToIdle"			"1.9"
+	"IdleInterval"			"20"
+
+	// New accuracy model parameters
+	"Spread"					0.00060
+	"InaccuracyCrouch"			0.00687
+	"InaccuracyStand"			0.00916
+	"InaccuracyJump"			0.43044
+	"InaccuracyLand"			0.08609
+	"InaccuracyLadder"			0.10761
+	"InaccuracyFire"			0.01158
+	"InaccuracyMove"			0.09222
+
+	"RecoveryTimeCrouch"		0.34868
+	"RecoveryTimeStand"			0.48815
+
+	// Weapon data is loaded by both the Game and Client DLLs.
+	"printname"			"#Cstrike_WPNHUD_AK47"
+	"viewmodel"			"models/weapons/v_rif_ak47.mdl"
+	"playermodel"			"models/weapons/w_rif_ak47.mdl"
+
+	"anim_prefix"			"anim"
+	"bucket"			"0"
+	"bucket_position"		"0"
+
+	"clip_size"			"30"
+
+	"primary_ammo"			"BULLET_PLAYER_762MM"
+	"secondary_ammo"		"None"
+
+	"weight"			"25"
+	"item_flags"			"0"
+
+	// Sounds for the weapon. There is a max of 16 sounds per category (i.e. max 16 "single_shot" sounds)
+	SoundData
+	{
+		"single_shot"		"Weapon_AK47.Single"
+	}
+
+	// Weapon Sprite data is loaded by the Client DLL.
+	TextureData
+	{
+		//Weapon Select Images
+		"weapon"
+		{
+				"font"		"CSweaponsSmall"
+				"character"	"B"
+		}
+		"weapon_s"
+		{
+				"font"		"CSweapons"
+				"character"	"B"
+		}
+		"ammo"
+		{
+				"font"		"CSTypeDeath"
+				"character"		"V"
+		}
+		"crosshair"
+		{
+				"file"		"sprites/crosshairs"
+				"x"			"0"
+				"y"			"48"
+				"width"		"24"
+				"height"	"24"
+		}
+		"autoaim"
+		{
+				"file"		"sprites/crosshairs"
+				"x"			"0"
+				"y"			"48"
+				"width"		"24"
+				"height"	"24"
+		}
+	}
+	ModelBounds
+	{
+		Viewmodel
+		{
+			Mins	"-9 -3 -13"
+			Maxs	"30 11 0"
+		}
+		World
+		{
+			Mins	"-9 -9 -9"
+			Maxs	"30 9 7"
+		}
+	}
+}]=]
+
+function SWEP:OverrideData(tbl)
+	-- TODO: cvar for cs:s slots?
+	tbl.Slot = 2
+end
+
+function SWEP:GetWeaponID()
+	return WEAPON_AK47
+end
+
+local weapon_accuracy_model = GetConVar("swsrc_weapon_accuracy_model")
+function SWEP:GetInaccuracy()
+	local selfTable = self:GetTable()
+
+	if weapon_accuracy_model:GetInt() == 1 then
+		local owner = selfTable.GetPlayerOwner(self)
+		if not owner then return 0 end
+
+		if owner:IsOnGround() then
+			return 0.04 + 0.4 * selfTable.GetAccuracy(self)
+		elseif owner:GetVelocity():Length2D() > 140 then
+			return 0.04 + 0.07 * selfTable.GetAccuracy(self)
+		else
+			return 0.0275 * selfTable.GetAccuracy(self)
+		end
+	else
+		return BaseClass.GetInaccuracy(self)
+	end
+end
+
+function SWEP:PrimaryAttack()
+	local selfTable = self:GetTable()
+
+	local owner = selfTable.GetPlayerOwner(self)
+	if not owner then return end
+
+	if not selfTable.CSBaseGunFire(self, selfTable.CSWpnData.m_flCycleTime, Primary_Mode) then return end
+
+	if owner:GetVelocity():Length2D() > 5 then
+		selfTable.KickBack(self, 1.5, 0.45, 0.225, 0.05, 6.5, 2.5, 7)
+	elseif owner:IsOnGround() then
+		selfTable.KickBack(self, 2, 1.0, 0.5, 0.35, 9, 6, 5)
+	elseif owner:IsDucking() then
+		selfTable.KickBack(self, 0.9, 0.35, 0.15, 0.025, 5.5, 1.5, 9)
+	else
+		selfTable.KickBack(self, 1, 0.375, 0.175, 0.0375, 5.75, 1.75, 8)
+	end
+end

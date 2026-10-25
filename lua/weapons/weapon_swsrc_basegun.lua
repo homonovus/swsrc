@@ -97,7 +97,7 @@ function SWEP:CSBaseGunFire(flCycleTime, weaponMode)
 
 	selfTable.FX_FireBullets(self, weaponMode, flCurAttack)
 
-	owner:MuzzleFlash()
+	selfTable.DoFireEffects(self, selfTable)
 
 	selfTable.SetWeaponIdleTime(self, CurTime() + pCSInfo.m_flTimeToIdleAfterFire)
 
@@ -257,4 +257,13 @@ function SWEP:WeaponIdle(tbl)
 		selfTable.SetWeaponIdleTime(self, CurTime() + selfTable.CSWpnData.m_flIdleInterval)
 		selfTable.SetWeaponAnim(self, ACT_VM_IDLE)
 	end
+end
+
+function SWEP:DoFireEffects(tbl)
+	local selfTable = tbl or self:GetTable()
+
+	local owner = selfTable.GetPlayerOwner(self)
+	if not owner then return end
+
+	owner:MuzzleFlash()
 end
