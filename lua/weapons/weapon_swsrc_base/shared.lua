@@ -134,6 +134,7 @@ function SWEP:SetupDataTables()
 	self:NetworkVar("Int", 0, "ShotsFired")
 	self:NetworkVar("Int", 1, "LastZoom")
 	self:NetworkVar("Int", 2, "WeaponMode")
+	self:NetworkVar("Int", 3, "KickDirection")
 
 	self:NetworkVar("Float", 0, "DecreaseShotsFired")
 	self:NetworkVar("Float", 1, "WeaponIdleTime")
@@ -142,6 +143,7 @@ function SWEP:SetupDataTables()
 	self:SetDelayFire(true)
 	self:SetAccuracyPenalty(0)
 	self:SetWeaponMode(Primary_Mode)
+	self:SetKickDirection(0)
 end
 
 function SWEP:GetPlayerOwner()
@@ -538,6 +540,49 @@ function SWEP:UpdateAccuracyPenalty(tbl)
 		selfTable.SetAccuracyPenalty(self,
 			Lerp(math.exp(engine.TickInterval() * -fDecayFactor), fNewPenalty, selfTable.GetAccuracyPenalty(self)))
 	end
+end
+
+function SWEP:KickBack(up_base, lateral_base, up_modifier, lateral_modifier, up_max, lateral_max, direction_change)
+	local selfTable = self:GetTable()
+
+	local owner = selfTable.GetPlayerOwner(self)
+	if not owner then return end
+
+	local flKickUp = 0
+	local flKickLateral = 0
+
+	local m_iShotsFired = selfTable.GetShotsFired(self)
+	if m_iShotsFired == 1 then
+		flKickUp = up_base
+		flKickLateral = lateral_base
+	else
+		flKickUp = up_base + m_iShotsFired * up_modifier
+		flKickLateral = lateral_base + m_iShotsFired * lateral_modifier
+	end
+
+	local angle = Angle()
+	angle.x = -flKickUp
+	if angle.x < -up_max then
+		angle.x = -up_max
+	end
+
+	if selfTable.GetKickDirection(self) == 1 then
+		angle.y = flKickLateral
+		if angle.y > lateral_max then
+			angle.y = lateral_max
+		end
+	else
+		angle.y = -flKickLateral
+		if angle.y < -lateral_max then
+			angle.y = -lateral_max
+		end
+	end
+
+	if math.floor(util.SharedRandom("KickBack", 0, direction_change)) == 0 then
+		selfTable.SetKickDirection(self, 1 - selfTable.GetKickDirection(self))
+	end
+
+	owner:ViewPunch(angle)
 end
 
 function SWEP:PrimaryAttack()
