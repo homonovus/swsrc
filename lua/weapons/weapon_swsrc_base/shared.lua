@@ -560,19 +560,19 @@ function SWEP:KickBack(up_base, lateral_base, up_modifier, lateral_modifier, up_
 		flKickLateral = lateral_base + m_iShotsFired * lateral_modifier
 	end
 
-	local angle = Angle()
-	angle.x = -flKickUp
+	local angle = owner:GetViewPunchAngles()
+	angle.x = angle.x - flKickUp
 	if angle.x < -up_max then
 		angle.x = -up_max
 	end
 
 	if selfTable.GetKickDirection(self) == 1 then
-		angle.y = flKickLateral
+		angle.y = angle.y + flKickLateral
 		if angle.y > lateral_max then
 			angle.y = lateral_max
 		end
 	else
-		angle.y = -flKickLateral
+		angle.y = angle.y - flKickLateral
 		if angle.y < -lateral_max then
 			angle.y = -lateral_max
 		end
@@ -582,7 +582,7 @@ function SWEP:KickBack(up_base, lateral_base, up_modifier, lateral_modifier, up_
 		selfTable.SetKickDirection(self, 1 - selfTable.GetKickDirection(self))
 	end
 
-	owner:ViewPunch(angle)
+	owner:SetViewPunchAngles(angle)
 end
 
 function SWEP:PrimaryAttack()
