@@ -318,7 +318,7 @@ end
 function SWEP:Reload()
 	local selfTable = self:GetTable()
 
-	if not BaseClass.Reload(self, selfTable.GetSilencerOn(self) and ACT_VM_RELOAD_SILENCED or ACT_VM_RELOAD) then return false end
+	if not BaseClass.Reload(self) then return false end
 
 	selfTable.SetAccuracy(self, 0.92)
 	return true

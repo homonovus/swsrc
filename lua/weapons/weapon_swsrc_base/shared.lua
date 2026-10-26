@@ -224,13 +224,13 @@ end
 function SWEP:WeaponIdle(_)
 end
 
-function SWEP:Reload(act)
+function SWEP:Reload()
 	local selfTable = self:GetTable()
 
 	if selfTable.GetInReload(self) then return false end
 
 	local curtime = CurTime()
-    if self:GetNextPrimaryFire() > curtime then return false end
+	if self:GetNextPrimaryFire() > curtime then return false end
 	if self:Clip1() >= self:GetMaxClip1() then return false end
 
 	local owner = selfTable.GetPlayerOwner(self)
@@ -238,7 +238,7 @@ function SWEP:Reload(act)
 
 	selfTable.SetShotsFired(self, 0)
 
-	local ok, duration = selfTable.SetWeaponAnim(self, act or ACT_VM_RELOAD)
+	local ok, duration = selfTable.SetWeaponAnim(self, ACT_VM_RELOAD)
 	if not ok then return false end
 
 	selfTable.SetInReload(self, true)
@@ -647,7 +647,8 @@ function SWEP:OnJump(owner, impulse, selfTable)
 	local wdat = selfTable.CSWpnData
 
 	local mode = selfTable.GetWeaponMode(self)
-	selfTable.SetAccuracyPenalty(self, selfTable.GetAccuracyPenalty(self) + (wdat.m_fInaccuracyJump[mode] * (impulse / owner:GetJumpPower())))
+	selfTable.SetAccuracyPenalty(self,
+		selfTable.GetAccuracyPenalty(self) + (wdat.m_fInaccuracyJump[mode] * (impulse / owner:GetJumpPower())))
 end
 
 function SWEP:OnLand(owner, speed, selfTable)
@@ -655,20 +656,21 @@ function SWEP:OnLand(owner, speed, selfTable)
 	local wdat = selfTable.CSWpnData
 
 	local mode = selfTable.GetWeaponMode(self)
-	selfTable.SetAccuracyPenalty(self, selfTable.GetAccuracyPenalty(self) + (wdat.m_fInaccuracyLand[mode] * (speed / owner:GetJumpPower())))
+	selfTable.SetAccuracyPenalty(self,
+		selfTable.GetAccuracyPenalty(self) + (wdat.m_fInaccuracyLand[mode] * (speed / owner:GetJumpPower())))
 end
 
 function SWEP:DecayPunchAngle(tbl)
 	tbl = tbl or self:GetTable()
 	local ang = tbl.GetViewPunchAngle(self)
-	local p,y,r = ang:Unpack()
-	local dir = Vector(p,y,r)
+	local p, y, r = ang:Unpack()
+	local dir = Vector(p, y, r)
 
 	local length = dir:Length()
 	if length <= 0 then return end
 
 	dir:Normalize()
-	p,y,r = dir:Unpack()
+	p, y, r = dir:Unpack()
 
 	local decayed = math.max(0, length - FrameTime() * ((0.5 * length) + 10))
 	tbl.SetViewPunchPitch(self, p * decayed)
