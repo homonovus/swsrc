@@ -4,6 +4,7 @@ SWEP.Base = "weapon_swsrc_basegun"
 DEFINE_BASECLASS(SWEP.Base)
 
 SWEP.Category = "#spawnmenu.category.swsrc"
+SWEP.SubCategory = "#spawnmenu.category.swsrc_smgs"
 
 SWEP.PrintName = "TMP"
 SWEP.Spawnable = true

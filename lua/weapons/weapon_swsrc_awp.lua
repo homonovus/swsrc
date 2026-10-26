@@ -4,6 +4,7 @@ SWEP.Base = "weapon_swsrc_basegun"
 DEFINE_BASECLASS(SWEP.Base)
 
 SWEP.Category = "#spawnmenu.category.swsrc"
+SWEP.SubCategory = "#spawnmenu.category.swsrc_snipers"
 
 SWEP.PrintName = "AWP"
 SWEP.Spawnable = true

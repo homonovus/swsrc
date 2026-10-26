@@ -4,6 +4,7 @@ SWEP.Base = "weapon_swsrc_basegun"
 DEFINE_BASECLASS(SWEP.Base)
 
 SWEP.Category = "#spawnmenu.category.swsrc"
+SWEP.SubCategory = "#spawnmenu.category.swsrc_pistols"
 
 SWEP.PrintName = "Glock-18"
 SWEP.Spawnable = true
@@ -208,7 +209,7 @@ function SWEP:GetInaccuracy()
 		local m_flAccuracy
 		selfTable.GetAccuracy(self)
 		if selfTable.GetBurstMode(self) then
-			if owner:IsOnGround() then
+			if not owner:IsOnGround() then
 				return 1.2 * (1 - m_flAccuracy)
 			elseif owner:GetVelocity():Length2D() > 5 then
 				return 0.185 * (1 - m_flAccuracy)
@@ -218,7 +219,7 @@ function SWEP:GetInaccuracy()
 				return 0.3 * (1 - m_flAccuracy)
 			end
 		else
-			if owner:IsOnGround() then
+			if not owner:IsOnGround() then
 				return 1 - m_flAccuracy
 			elseif owner:GetVelocity() > 5 then
 				return 0.165 * (1 - m_flAccuracy)
@@ -268,7 +269,7 @@ function SWEP:PrimaryAttack()
 
 	self:SetClip1(self:Clip1() - 1)
 
-	selfTable.DoFireEffects(self, selfTable)
+	owner:MuzzleFlash()
 
 	owner:SetAnimation(PLAYER_ATTACK1)
 

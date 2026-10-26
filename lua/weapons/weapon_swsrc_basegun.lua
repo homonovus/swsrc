@@ -221,7 +221,7 @@ function SWEP:FX_FireBullets(iMode, flCurAttack, fInaccuracy, fSpread)
 	owner:LagCompensation(false)
 end
 
-function SWEP:Reload()
+function SWEP:Reload(act)
 	local selfTable = self:GetTable()
 
 	local owner = selfTable.GetPlayerOwner(self)
@@ -231,7 +231,7 @@ function SWEP:Reload()
 
 	owner:SetFOV(0, 0)
 
-	local iResult = self:DefaultReload(ACT_VM_RELOAD)
+	local iResult = self:DefaultReload(act or ACT_VM_RELOAD)
 	if not iResult then return false end
 
 	owner:SetAnimation(PLAYER_RELOAD)

@@ -6,12 +6,6 @@ include("swsrc/sh_cvars.lua")
 include("swsrc/sh_player.lua")
 include("swsrc/sh_util.lua")
 
-if CLIENT then
-	include("swsrc/cl_tab.lua")
-elseif SERVER then
-	AddCSLuaFile("swsrc/cl_tab.lua")
-end
-
 hook.Add("SetupMove", "swsrc.movement", function(ply, move, cmd)
 	if not ply:IsValid() then return end
 
@@ -53,3 +47,7 @@ hook.Add("SetupMove", "swsrc.movement", function(ply, move, cmd)
 		end
 	end
 end)
+
+if CLIENT then
+	list.Set("ContentCategoryIcons", language.GetPhrase("#spawnmenu.category.swsrc"), "games/16/cstrike.png")
+end

@@ -4,6 +4,7 @@ SWEP.Base = "weapon_swsrc_base"
 DEFINE_BASECLASS(SWEP.Base)
 
 SWEP.Category = "#spawnmenu.category.swsrc"
+SWEP.SubCategory = "#spawnmenu.category.other"
 
 SWEP.PrintName = "Knife"
 SWEP.Spawnable = true
