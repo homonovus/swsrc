@@ -376,9 +376,6 @@ hook.Add("PreRegisterSWEP", "swsrc.register", function(swep, class)
 				if iconData then
 					if iconData.bRenderedUsingFont then
 						local char = iconData.cCharacterInFont
-						if iconData.szTextureFile == "CSweaponsSmall" then
-							char = char:lower()
-						end
 						killicon.AddFont(class, "CSTypeDeath", char, COLOR_KILLICON, 0.5)
 					else
 						-- TODO?

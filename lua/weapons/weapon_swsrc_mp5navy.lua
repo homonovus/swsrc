@@ -87,12 +87,12 @@ SWEP.WeaponData = [=[WeaponData
 		"weapon"
 		{
 				"font"		"CSweaponsSmall"
-				"character"	"X"
+				"character"	"x"
 		}
 		"weapon_s"
 		{
 				"font"		"CSweapons"
-				"character"	"X"
+				"character"	"x"
 		}
 		"ammo"
 		{

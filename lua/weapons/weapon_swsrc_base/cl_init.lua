@@ -456,9 +456,8 @@ do -- weapon selection
 	font_CSweapons.scanlines = ScreenScaleH(2)
 	surface.CreateFont("CSweapons_glow", font_CSweapons)
 
-	function SWEP:RenderTextureData(key, x, y, w, h, col, glow, lower)
+	function SWEP:RenderTextureData(key, x, y, w, h, col, glow)
 		if glow == nil then glow = false end
-		if lower == nil then lower = false end
 
 		local iconDataKV = self.CSWpnData.TextureData[key]
 		if not iconDataKV then return end
@@ -468,9 +467,6 @@ do -- weapon selection
 		if File and #File > 0 then
 			if iconDataKV.bRenderedUsingFont then
 				local character = iconDataKV.cCharacterInFont
-				if lower then
-					character = character:lower()
-				end
 
 				surface.SetFont(File)
 				local cw, ch = surface.GetTextSize(character)
@@ -527,7 +523,7 @@ do -- weapon selection
 
 	function SWEP:DrawWeaponSelection(x, y, w, h, a)
 		self.SelectionColor.a = a
-		self:RenderTextureData("weapon_s", x, y, w, h, self.SelectionColor, true, true)
+		self:RenderTextureData("weapon_s", x, y, w, h, self.SelectionColor, true)
 	end
 end
 
