@@ -26,10 +26,10 @@ SWEP.WeaponData = [=[WeaponData
 	"BuiltRightHanded"		"0"
 	"PlayerAnimationExtension"	"mp5"
 	"MuzzleFlashScale"		"1.1"
-	
+
 	"CanEquipWithShield"		"0"
-	
-	
+
+
 	// Weapon characteristics:
 	"Penetration"			"1"
 	"Damage"			"26"
@@ -42,7 +42,7 @@ SWEP.WeaponData = [=[WeaponData
 	"MaxInaccuracy"			"0.75"
 	"TimeToIdle"			"2"
 	"IdleInterval"			"20"
-	
+
 	// New accuracy model parameters
 	"Spread"					0.00100
 	"InaccuracyCrouch"			0.01289
@@ -52,21 +52,21 @@ SWEP.WeaponData = [=[WeaponData
 	"InaccuracyLadder"			0.05756
 	"InaccuracyFire"			0.00638
 	"InaccuracyMove"			0.01785
-								 
+
 	"RecoveryTimeCrouch"		0.27960
 	"RecoveryTimeStand"			0.39144
-	
+
 	// Weapon data is loaded by both the Game and Client DLLs.
 	"printname"			"#Cstrike_WPNHUD_MP5"
 	"viewmodel"			"models/weapons/v_smg_mp5.mdl"
 	"playermodel"			"models/weapons/w_smg_mp5.mdl"
-	
+
 	"anim_prefix"			"anim"
 	"bucket"			"0"
 	"bucket_position"		"0"
 
 	"clip_size"			"30"
-	
+
 	"primary_ammo"			"BULLET_PLAYER_9MM"
 	"secondary_ammo"		"None"
 
@@ -90,7 +90,7 @@ SWEP.WeaponData = [=[WeaponData
 				"character"	"X"
 		}
 		"weapon_s"
-		{	
+		{
 				"font"		"CSweapons"
 				"character"	"X"
 		}

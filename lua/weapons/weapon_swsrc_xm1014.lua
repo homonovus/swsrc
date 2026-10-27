@@ -26,9 +26,9 @@ SWEP.WeaponData = [=[WeaponData
 	"BuiltRightHanded"		"0"
 	"PlayerAnimationExtension"	"xm1014"
 	"MuzzleFlashScale"		"1.3"
-	
+
 	"CanEquipWithShield"		"0"
-	
+
 	// Weapon characteristics:
 	"Penetration"			"1"
 	"Damage"			"22"
@@ -36,9 +36,9 @@ SWEP.WeaponData = [=[WeaponData
 	"RangeModifier"			"0.70"
 	"Bullets"			"6"
 	"CycleTime"			"0.25"
-	
+
 	// New accuracy model parameters
-	
+
 	"Spread"					0.04000
 	"InaccuracyCrouch"			0.00750
 	"InaccuracyStand"			0.01000
@@ -47,21 +47,21 @@ SWEP.WeaponData = [=[WeaponData
 	"InaccuracyLadder"			0.07721
 	"InaccuracyFire"			0.03644
 	"InaccuracyMove"			0.03544
-	
+
 	"RecoveryTimeCrouch"		0.32894
 	"RecoveryTimeStand"			0.46052
-	
+
 	// Weapon data is loaded by both the Game and Client DLLs.
 	"printname"			"#Cstrike_WPNHUD_xm1014"
 	"viewmodel"			"models/weapons/v_shot_xm1014.mdl"
 	"playermodel"			"models/weapons/w_shot_xm1014.mdl"
-	
+
 	"anim_prefix"			"anim"
 	"bucket"			"0"
 	"bucket_position"		"0"
 
 	"clip_size"			"7"
-	
+
 	"primary_ammo"			"BULLET_PLAYER_BUCKSHOT"
 	"secondary_ammo"		"None"
 
@@ -86,7 +86,7 @@ SWEP.WeaponData = [=[WeaponData
 				"character"	"]"
 		}
 		"weapon_s"
-		{	
+		{
 				"font"		"CSweapons"
 				"character"	"]"
 		}
@@ -221,8 +221,8 @@ function SWEP:PrimaryAttack()
 	local x
 	if owner:IsOnGround() then
 		x = math.floor(util.SharedRandom("XM1014PunchAngleGround", 3, 5))
-    else
-        x = math.floor(util.SharedRandom("XM1014PunchAngleAir", 7, 10))
+	else
+		x = math.floor(util.SharedRandom("XM1014PunchAngleAir", 7, 10))
 	end
 
 	selfTable.SetViewPunchPitch(self, selfTable.GetViewPunchPitch(self) - x)

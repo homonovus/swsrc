@@ -28,8 +28,8 @@ SWEP.WeaponData = [=[WeaponData
 	"MuzzleFlashScale"		"1.5"
 	"MuzzleFlashStyle"		"CS_MUZZLEFLASH_X"
 	"CanEquipWithShield" 		"0"
-	
-	
+
+
 	// Weapon characteristics:
 	"Penetration"			"3"
 	"Damage"			"80"
@@ -42,7 +42,7 @@ SWEP.WeaponData = [=[WeaponData
 	"MaxInaccuracy"			"0"
 	"TimeToIdle"			"1.8"
 	"IdleInterval"			"60"
-	
+
 	// New accuracy model parameters
 	"Spread"					0.00030
 	"InaccuracyCrouch"			0.01935
@@ -52,7 +52,7 @@ SWEP.WeaponData = [=[WeaponData
 	"InaccuracyLadder"			0.11639
 	"InaccuracyFire"			0.04989
 	"InaccuracyMove"			0.23279
-								 
+
 	"SpreadAlt"					0.00030
 	"InaccuracyCrouchAlt"		0.00150
 	"InaccuracyStandAlt"		0.00200
@@ -61,21 +61,21 @@ SWEP.WeaponData = [=[WeaponData
 	"InaccuracyLadderAlt"		0.11639
 	"InaccuracyFireAlt"			0.04989
 	"InaccuracyMoveAlt"			0.23279
-								 
+
 	"RecoveryTimeCrouch"		0.22245
 	"RecoveryTimeStand"			0.31142
-	
+
 	// Weapon data is loaded by both the Game and Client DLLs.
 	"printname"			"#Cstrike_WPNHUD_G3SG1"
 	"viewmodel"			"models/weapons/v_snip_g3sg1.mdl"
 	"playermodel"			"models/weapons/w_snip_g3sg1.mdl"
-	
+
 	"anim_prefix"			"anim"
 	"bucket"			"0"
 	"bucket_position"		"0"
 
 	"clip_size"			"20"
-	
+
 	"primary_ammo"			"BULLET_PLAYER_762MM"
 	"secondary_ammo"		"None"
 
@@ -100,7 +100,7 @@ SWEP.WeaponData = [=[WeaponData
 				"character"	"I"
 		}
 		"weapon_s"
-		{	
+		{
 				"font"		"CSweapons"
 				"character"	"I"
 		}
@@ -134,18 +134,17 @@ SWEP.WeaponData = [=[WeaponData
 }]=]
 
 function SWEP:SetupDataTables()
-    BaseClass.SetupDataTables(self)
+	BaseClass.SetupDataTables(self)
 
-    self:NetworkVar("Float", "LastFire")
+	self:NetworkVar("Float", "LastFire")
 
-    self:SetLastFire(CurTime())
-    self:SetAccuracy(0.98)
+	self:SetLastFire(CurTime())
+	self:SetAccuracy(0.98)
 end
 
 function SWEP:OverrideData(tbl)
 	-- TODO: cvar for cs:s slots?
 	tbl.Slot = 3
-
 end
 
 function SWEP:GetWeaponID()
@@ -224,27 +223,27 @@ function SWEP:PrimaryAttack()
 	local owner = selfTable.GetPlayerOwner(self)
 	if not owner then return end
 
-    local curtime = CurTime()
+	local curtime = CurTime()
 
-    -- Mark the time of this shot and determine the accuracy modifier based on the last shot fired...
-    local m_flAccuracy = 0.55 + (0.3 * (curtime - selfTable.GetLastFire(self)))
+	-- Mark the time of this shot and determine the accuracy modifier based on the last shot fired...
+	local m_flAccuracy = 0.55 + (0.3 * (curtime - selfTable.GetLastFire(self)))
 
-    m_flAccuracy = math.min(m_flAccuracy, 0.98)
-    selfTable.SetAccuracy(self, m_flAccuracy)
+	m_flAccuracy = math.min(m_flAccuracy, 0.98)
+	selfTable.SetAccuracy(self, m_flAccuracy)
 
-    selfTable.SetLastFire(self, curtime)
+	selfTable.SetLastFire(self, curtime)
 
 	local m_weaponMode = selfTable.GetWeaponMode(self)
 	if not selfTable.CSBaseGunFire(self, selfTable.CSWpnData.m_flCycleTime, m_weaponMode) then return end
 
-    -- Adjust the punch angle.
-    local angleP = selfTable.GetViewPunchPitch()
-    local angleY = selfTable.GetViewPunchYaw()
+	-- Adjust the punch angle.
+	local angleP = selfTable.GetViewPunchPitch()
+	local angleY = selfTable.GetViewPunchYaw()
 	local x = util.SharedRandom("G3SG1PunchAngleX", 0.75, 1.75) + (angleP * 0.25)
-    local y = util.SharedRandom("G3SG1PunchAngleY", -0.75, 0.75)
+	local y = util.SharedRandom("G3SG1PunchAngleY", -0.75, 0.75)
 
-    angleP = angleP - x
-    angleY = angleY + y
+	angleP = angleP - x
+	angleY = angleY + y
 
 	selfTable.SetViewPunchPitch(self, angleP)
 	selfTable.SetViewPunchYaw(self, angleY)
@@ -252,7 +251,7 @@ end
 
 function SWEP:Reload()
 	local selfTable = self:GetTable()
-    selfTable.SetAccuracy(self, 0.98)
+	selfTable.SetAccuracy(self, 0.98)
 	selfTable.SetWeaponMode(self, Primary_Mode)
 	self:SetHoldType(selfTable.HoldType)
 
@@ -267,7 +266,7 @@ function SWEP:Deploy()
 
 	if not BaseClass.Deploy(self) then return false end
 
-    selfTable.SetAccuracy(self, 0.98)
+	selfTable.SetAccuracy(self, 0.98)
 	selfTable.SetWeaponMode(self, Primary_Mode)
 
 	self:SetNextPrimaryFire(math.max(self:GetNextPrimaryFire(), oPri))

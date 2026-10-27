@@ -22,7 +22,7 @@ local g_SilencedTranslations = {
 
 SWEP.WeaponData = [=[WeaponData
 {
-	"MaxPlayerSpeed" 		"230" 
+	"MaxPlayerSpeed" 		"230"
 	"WeaponType" 			"Rifle"
 	"FullAuto"				1
 	"WeaponPrice" 			"3100"
@@ -33,10 +33,10 @@ SWEP.WeaponData = [=[WeaponData
 	"BuiltRightHanded" 		"0"
 	"PlayerAnimationExtension" 	"m4"
 	"MuzzleFlashScale"		"1.6"
-	
+
 	"CanEquipWithShield"		"0"
-	
-	
+
+
 	// Weapon characteristics:
 	"Penetration"			"2"
 	"Damage"			"33"
@@ -49,7 +49,7 @@ SWEP.WeaponData = [=[WeaponData
 	"MaxInaccuracy"			"1.0"
 	"TimeToIdle"			"1.5"
 	"IdleInterval"			"60"
-	
+
 	// New accuracy model parameters
 	"Spread"					0.00060
 	"InaccuracyCrouch"			0.00525
@@ -59,7 +59,7 @@ SWEP.WeaponData = [=[WeaponData
 	"InaccuracyLadder"			0.08538
 	"InaccuracyFire"			0.01266
 	"InaccuracyMove"			0.06872
-								 
+
 	"SpreadAlt"					0.00054
 	"InaccuracyCrouchAlt"		0.00525
 	"InaccuracyStandAlt"		0.00700
@@ -68,22 +68,22 @@ SWEP.WeaponData = [=[WeaponData
 	"InaccuracyLadderAlt"		0.08712
 	"InaccuracyFireAlt"			0.01165
 	"InaccuracyMoveAlt"			0.07039
-								 
+
 	"RecoveryTimeCrouch"		0.26973
 	"RecoveryTimeStand"			0.37762
-	
+
 	// Weapon data is loaded by both the Game and Client DLLs.
 	"printname"			"#Cstrike_WPNHUD_M4A1"
 	"viewmodel"			"models/weapons/v_rif_m4a1.mdl"
 	"playermodel"			"models/weapons/w_rif_m4a1.mdl"
 	"SilencerModel"			"models/weapons/w_rif_m4a1_silencer.mdl"
-	
+
 	"anim_prefix"			"anim"
 	"bucket"			"0"
 	"bucket_position"		"0"
 
 	"clip_size"			"30"
-	
+
 	"primary_ammo"			"BULLET_PLAYER_556MM"
 	"secondary_ammo"		"None"
 
@@ -110,7 +110,7 @@ SWEP.WeaponData = [=[WeaponData
 				"character"	"W"
 		}
 		"weapon_s"
-		{	
+		{
 				"font"		"CSweapons"
 				"character"	"W"
 		}
@@ -239,19 +239,19 @@ function SWEP:GetInaccuracy()
 		local owner = selfTable.GetPlayerOwner(self)
 		if not owner then return 0 end
 
-        if not owner:IsOnGround() then
-            return 0.035 + (0.4 * selfTable.GetAccuracy(self))
-        elseif owner:GetVelocity():Length2D() > 140 then
-            return 0.035 + (0.07 * selfTable.GetAccuracy(self))
-        elseif owner:IsDucking() then
-            return 0.125 * (1 - selfTable.GetAccuracy(self))
-        else
-            if selfTable.GetSilencerOn(self) then
-                return 0.025 * selfTable.GetAccuracy(self)
-            else
-                return 0.02 * selfTable.GetAccuracy(self)
-            end
-        end
+		if not owner:IsOnGround() then
+			return 0.035 + (0.4 * selfTable.GetAccuracy(self))
+		elseif owner:GetVelocity():Length2D() > 140 then
+			return 0.035 + (0.07 * selfTable.GetAccuracy(self))
+		elseif owner:IsDucking() then
+			return 0.125 * (1 - selfTable.GetAccuracy(self))
+		else
+			if selfTable.GetSilencerOn(self) then
+				return 0.025 * selfTable.GetAccuracy(self)
+			else
+				return 0.02 * selfTable.GetAccuracy(self)
+			end
+		end
 	else
 		return BaseClass.GetInaccuracy(self)
 	end
@@ -263,13 +263,13 @@ function SWEP:PrimaryAttack()
 	local owner = selfTable.GetPlayerOwner(self)
 	if not owner then return end
 
-    if not selfTable.CSBaseGunFire(self, selfTable.CSWpnData.m_flCycleTime, selfTable.GetWeaponMode(self)) then return end
+	if not selfTable.CSBaseGunFire(self, selfTable.CSWpnData.m_flCycleTime, selfTable.GetWeaponMode(self)) then return end
 
-    if selfTable.GetSilencerOn(self) then
-        selfTable.SetWeaponAnim(self, ACT_VM_PRIMARYATTACK_SILENCED)
-    end
+	if selfTable.GetSilencerOn(self) then
+		selfTable.SetWeaponAnim(self, ACT_VM_PRIMARYATTACK_SILENCED)
+	end
 
-    if owner:GetVelocity():Length2D() > 5 then
+	if owner:GetVelocity():Length2D() > 5 then
 		selfTable.KickBack(self, 1.0, 0.45, 0.28, 0.045, 3.75, 3, 7)
 	elseif not owner:IsOnGround() then
 		selfTable.KickBack(self, 1.2, 0.5, 0.23, 0.15, 5.5, 3.5, 6)

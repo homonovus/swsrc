@@ -26,10 +26,10 @@ SWEP.WeaponData = [=[WeaponData
 	"BuiltRightHanded"		"0"
 	"PlayerAnimationExtension"	"mac10"
 	"MuzzleFlashScale"		"1.1"
-	
+
 	"CanEquipWithShield"		"0"
-	
-	
+
+
 	// Weapon characteristics:
 	"Penetration"			"1"
 	"Damage"			"29"
@@ -52,21 +52,21 @@ SWEP.WeaponData = [=[WeaponData
 	"InaccuracyLadder"			0.03426
 	"InaccuracyFire"			0.00845
 	"InaccuracyMove"			0.00620
-								 
+
 	"RecoveryTimeCrouch"		0.25263
 	"RecoveryTimeStand"			0.35368
-	
+
 	// Weapon data is loaded by both the Game and Client DLLs.
 	"printname"			"#Cstrike_WPNHUD_MAC10"
 	"viewmodel"			"models/weapons/v_smg_mac10.mdl"
 	"playermodel"			"models/weapons/w_smg_mac10.mdl"
-	
+
 	"anim_prefix"			"anim"
 	"bucket"			"0"
 	"bucket_position"		"0"
 
 	"clip_size"			"30"
-	
+
 	"primary_ammo"			"BULLET_PLAYER_45ACP"
 	"secondary_ammo"		"None"
 
@@ -90,7 +90,7 @@ SWEP.WeaponData = [=[WeaponData
 				"character"	"L"
 		}
 		"weapon_s"
-		{	
+		{
 				"font"		"CSweapons"
 				"character"	"L"
 		}

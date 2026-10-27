@@ -28,8 +28,8 @@ SWEP.WeaponData = [=[WeaponData
 	"MuzzleFlashScale"		"1.6"
 	"MuzzleFlashStyle"		"CS_MUZZLEFLASH_X"
 	"CanEquipWithShield"		"0"
-	
-	
+
+
 	// Weapon characteristics:
 	"Penetration"			"2"
 	"Damage"			"70"
@@ -52,7 +52,7 @@ SWEP.WeaponData = [=[WeaponData
 	"InaccuracyLadder"			0.10932
 	"InaccuracyFire"			0.03829
 	"InaccuracyMove"			0.21864
-								 
+
 	"SpreadAlt"					0.00030
 	"InaccuracyCrouchAlt"		0.00150
 	"InaccuracyStandAlt"		0.00200
@@ -61,21 +61,21 @@ SWEP.WeaponData = [=[WeaponData
 	"InaccuracyLadderAlt"		0.10932
 	"InaccuracyFireAlt"			0.03829
 	"InaccuracyMoveAlt"			0.21864
-								 
+
 	"RecoveryTimeCrouch"		0.20970
 	"RecoveryTimeStand"			0.29358
-	
+
 	// Weapon data is loaded by both the Game and Client DLLs.
 	"printname"			"#Cstrike_WPNHUD_SG550"
 	"viewmodel"			"models/weapons/v_snip_sg550.mdl"
 	"playermodel"			"models/weapons/w_snip_sg550.mdl"
-	
+
 	"anim_prefix"			"anim"
 	"bucket"			"0"
 	"bucket_position"		"0"
 
 	"clip_size"			"30"
-	
+
 	"primary_ammo"			"BULLET_PLAYER_556MM"
 	"secondary_ammo"		"None"
 
@@ -100,7 +100,7 @@ SWEP.WeaponData = [=[WeaponData
 				"character"	"O"
 		}
 		"weapon_s"
-		{	
+		{
 				"font"		"CSweapons"
 				"character"	"O"
 		}
@@ -134,18 +134,17 @@ SWEP.WeaponData = [=[WeaponData
 }]=]
 
 function SWEP:SetupDataTables()
-    BaseClass.SetupDataTables(self)
+	BaseClass.SetupDataTables(self)
 
-    self:NetworkVar("Float", "LastFire")
+	self:NetworkVar("Float", "LastFire")
 
-    self:SetLastFire(CurTime())
-    self:SetAccuracy(0.98)
+	self:SetLastFire(CurTime())
+	self:SetAccuracy(0.98)
 end
 
 function SWEP:OverrideData(tbl)
 	-- TODO: cvar for cs:s slots?
 	tbl.Slot = 3
-
 end
 
 function SWEP:GetWeaponID()
@@ -224,23 +223,23 @@ function SWEP:PrimaryAttack()
 	local owner = selfTable.GetPlayerOwner(self)
 	if not owner then return end
 
-    local curtime = CurTime()
+	local curtime = CurTime()
 
-    -- Mark the time of this shot and determine the accuracy modifier based on the last shot fired...
-    local m_flAccuracy = 0.65 + (0.35 * (curtime - selfTable.GetLastFire(self)))
+	-- Mark the time of this shot and determine the accuracy modifier based on the last shot fired...
+	local m_flAccuracy = 0.65 + (0.35 * (curtime - selfTable.GetLastFire(self)))
 
-    m_flAccuracy = math.min(m_flAccuracy, 0.98)
-    selfTable.SetAccuracy(self, m_flAccuracy)
+	m_flAccuracy = math.min(m_flAccuracy, 0.98)
+	selfTable.SetAccuracy(self, m_flAccuracy)
 
-    selfTable.SetLastFire(self, curtime)
+	selfTable.SetLastFire(self, curtime)
 
 	if not selfTable.CSBaseGunFire(self, selfTable.CSWpnData.m_flCycleTime, selfTable.GetWeaponMode(self)) then return end
 
-    -- Adjust the punch angle.
-    local angleP = selfTable.GetViewPunchPitch()
-    local angleY = selfTable.GetViewPunchYaw()
+	-- Adjust the punch angle.
+	local angleP = selfTable.GetViewPunchPitch()
+	local angleY = selfTable.GetViewPunchYaw()
 	local x = util.SharedRandom("SG550PunchAngleX", 0.75, 1.25) + (angleP * 0.25)
-    local y = util.SharedRandom("SG550PunchAngleY", -0.75, 0.75)
+	local y = util.SharedRandom("SG550PunchAngleY", -0.75, 0.75)
 
 	selfTable.SetViewPunchPitch(self, angleP - x)
 	selfTable.SetViewPunchYaw(self, angleY + y)
@@ -248,7 +247,7 @@ end
 
 function SWEP:Reload()
 	local selfTable = self:GetTable()
-    selfTable.SetAccuracy(self, 0.98)
+	selfTable.SetAccuracy(self, 0.98)
 	selfTable.SetWeaponMode(self, Primary_Mode)
 	self:SetHoldType(selfTable.HoldType)
 
@@ -263,7 +262,7 @@ function SWEP:Deploy()
 
 	if not BaseClass.Deploy(self) then return false end
 
-    selfTable.SetAccuracy(self, 0.98)
+	selfTable.SetAccuracy(self, 0.98)
 	selfTable.SetWeaponMode(self, Primary_Mode)
 
 	self:SetNextPrimaryFire(math.max(self:GetNextPrimaryFire(), oPri))
