@@ -147,7 +147,10 @@ function SWEP:SetupDataTables()
 end
 
 local weapon_accuracy_model = GetConVar("swsrc_weapon_accuracy_model")
+local weapon_accuracy_noinaccuracy = GetConVar("swsrc_weapon_accuracy_noinaccuracy")
 function SWEP:GetInaccuracy()
+	if weapon_accuracy_noinaccuracy:GetBool() then return 0 end
+
 	if weapon_accuracy_model:GetInt() == 1 then
 		return 0
 	end

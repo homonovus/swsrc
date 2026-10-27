@@ -33,6 +33,9 @@ end
 
 CreateConVar("sv_showimpacts_time", "4", FCVAR_REPLICATED, "Duration bullet impact indicators remain before disappearing")
 
-CreateConVar("swsrc_weapon_accuracy_model", "2", bit.bor(FCVAR_REPLICATED, FCVAR_ARCHIVE))
+CreateConVar("swsrc_weapon_accuracy_model", "2", bit.bor(FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE),
+	"0=original model, 1=pre-orangebox model, 2=new model")
+CreateConVar("swsrc_weapon_accuracy_noinaccuracy", "0", bit.bor(FCVAR_REPLICATED, FCVAR_NOTIFY))
+CreateConVar("swsrc_weapon_accuracy_nospread", "0", bit.bor(FCVAR_REPLICATED, FCVAR_NOTIFY))
 CreateConVar("swsrc_weapon_accuracy_logging", "0", bit.bor(FCVAR_REPLICATED, FCVAR_ARCHIVE))
 CreateConVar("swsrc_knife_damage_scale", "100")

@@ -293,6 +293,8 @@ function SWEP:Think_ProcessReloadAction(selfTable)
 end
 
 local weapon_accuracy_model = GetConVar("swsrc_weapon_accuracy_model")
+local weapon_accuracy_noinaccuracy = GetConVar("swsrc_weapon_accuracy_noinaccuracy")
+local weapon_accuracy_nospread = GetConVar("swsrc_weapon_accuracy_nospread")
 function SWEP:Think_ProcessIdleNoAction(selfTable)
 	if weapon_accuracy_model:GetInt() == 2 then
 		if selfTable.GetShotsFired(self) > 0 and (not selfTable.IsFullAuto(self, selfTable) or self:Clip1() == 0) then
@@ -434,6 +436,8 @@ local function RemapClamped(value, A, B, C, D)
 end
 
 function SWEP:GetInaccuracy()
+	if weapon_accuracy_noinaccuracy:GetBool() then return 0 end
+
 	local selfTable = self:GetTable()
 
 	local owner = selfTable.GetPlayerOwner(self)
@@ -450,6 +454,8 @@ function SWEP:GetInaccuracy()
 end
 
 function SWEP:GetSpread()
+	if weapon_accuracy_nospread:GetBool() then return 0 end
+
 	if weapon_accuracy_model:GetInt() == 1 then
 		return 0
 	end
