@@ -355,6 +355,7 @@ function swsrc.RegisterWeapon(WeaponData, SWEP)
 end
 
 swsrc.RegisteredItems = {}
+local COLOR_KILLICON = Color(255, 80, 0, 255)
 hook.Add("PreRegisterSWEP", "swsrc.register", function(swep, class)
 	local BaseName = swep.Base
 	if BaseName and class ~= "weapon_swsrc_basegun" then
@@ -369,6 +370,21 @@ hook.Add("PreRegisterSWEP", "swsrc.register", function(swep, class)
 			print("Registering " .. class)
 			swsrc.RegisterWeapon(swep.WeaponData, swep)
 			swsrc.RegisteredItems[class] = swep
+
+			if CLIENT then
+				local iconData = swep.CSWpnData.TextureData.weapon
+				if iconData then
+					if iconData.bRenderedUsingFont then
+						local char = iconData.cCharacterInFont
+						if iconData.szTextureFile == "CSweaponsSmall" then
+							char = char:lower()
+						end
+						killicon.AddFont(class, "CSTypeDeath", char, COLOR_KILLICON, 0.5)
+					else
+						-- TODO?
+					end
+				end
+			end
 		end
 	end
 end)

@@ -206,8 +206,7 @@ function SWEP:GetInaccuracy()
 		local owner = selfTable.GetPlayerOwner(self)
 		if not owner then return 0 end
 
-		local m_flAccuracy
-		selfTable.GetAccuracy(self)
+		local m_flAccuracy = selfTable.GetAccuracy(self)
 		if selfTable.GetBurstMode(self) then
 			if not owner:IsOnGround() then
 				return 1.2 * (1 - m_flAccuracy)
@@ -294,8 +293,8 @@ function SWEP:PrimaryAttack()
 		selfTable.GetAccuracyPenalty(self) + selfTable.CSWpnData.m_fInaccuracyFire[selfTable.GetWeaponMode(self)])
 end
 
-function SWEP:FireRemaining(fSpread)
-	local selfTable = self:GetTable()
+function SWEP:FireRemaining(tbl, fSpread)
+	local selfTable = tbl or self:GetTable()
 
 	local owner = selfTable.GetPlayerOwner(self)
 	if not owner then return end
@@ -340,7 +339,7 @@ function SWEP:ProcessExtraActivities(tbl)
 
 	while selfTable.GetBurstShotsRemaining(self) > 0 and CurTime() >= selfTable.GetNextBurstShot(self) do
 		if weapon_accuracy_model:GetInt() == 1 then
-			selfTable.FireRemaining(self, 0.05)
+			selfTable.FireRemaining(self, selfTable, 0.05)
 		else
 			selfTable.FireRemaining(self)
 		end
