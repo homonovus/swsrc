@@ -25,6 +25,7 @@ hook.Add("Initialize", "swsrc.ammo", function()
 		force = 2400,
 		minsplash = 10,
 		maxsplash = 14,
+		maxcarry = 35,
 	})
 	game.AddAmmoType({
 		name = "BULLET_PLAYER_762MM",
@@ -33,6 +34,7 @@ hook.Add("Initialize", "swsrc.ammo", function()
 		force = 2400,
 		minsplash = 10,
 		maxsplash = 14,
+		maxcarry = 90,
 	})
 	game.AddAmmoType({
 		name = "BULLET_PLAYER_556MM",
@@ -41,6 +43,7 @@ hook.Add("Initialize", "swsrc.ammo", function()
 		force = 2400,
 		minsplash = 10,
 		maxsplash = 14,
+		maxcarry = 90,
 	})
 	game.AddAmmoType({
 		name = "BULLET_PLAYER_556MM_BOX",
@@ -49,6 +52,7 @@ hook.Add("Initialize", "swsrc.ammo", function()
 		force = 2400,
 		minsplash = 10,
 		maxsplash = 14,
+		maxcarry = 200,
 	})
 	game.AddAmmoType({
 		name = "BULLET_PLAYER_338MAG",
@@ -57,6 +61,7 @@ hook.Add("Initialize", "swsrc.ammo", function()
 		force = 2800,
 		minsplash = 12,
 		maxsplash = 16,
+		maxcarry = 30,
 	})
 	game.AddAmmoType({
 		name = "BULLET_PLAYER_9MM",
@@ -65,6 +70,7 @@ hook.Add("Initialize", "swsrc.ammo", function()
 		force = 2000,
 		minsplash = 5,
 		maxsplash = 10,
+		maxcarry = 120,
 	})
 	game.AddAmmoType({
 		name = "BULLET_PLAYER_BUCKSHOT",
@@ -73,6 +79,7 @@ hook.Add("Initialize", "swsrc.ammo", function()
 		force = 600,
 		minsplash = 3,
 		maxsplash = 6,
+		maxcarry = 32,
 	})
 	game.AddAmmoType({
 		name = "BULLET_PLAYER_45ACP",
@@ -81,6 +88,7 @@ hook.Add("Initialize", "swsrc.ammo", function()
 		force = 2100,
 		minsplash = 6,
 		maxsplash = 10,
+		maxcarry = 100,
 	})
 	game.AddAmmoType({
 		name = "BULLET_PLAYER_357SIG",
@@ -89,6 +97,7 @@ hook.Add("Initialize", "swsrc.ammo", function()
 		force = 2000,
 		minsplash = 4,
 		maxsplash = 8,
+		maxcarry = 52,
 	})
 	game.AddAmmoType({
 		name = "BULLET_PLAYER_57MM",
@@ -97,6 +106,7 @@ hook.Add("Initialize", "swsrc.ammo", function()
 		force = 2000,
 		minsplash = 4,
 		maxsplash = 8,
+		maxcarry = 100,
 	})
 
 	game.AddAmmoType({
