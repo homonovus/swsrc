@@ -11,7 +11,6 @@ SWEP.Spawnable = true
 SWEP.HoldType = "ar2"
 SWEP.WorldModel = "models/weapons/w_snip_sg550.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_snip_sg550.mdl"
-SWEP.IconOverride = "vgui/gfx/vgui/fav_weap/sg550"
 
 SWEP.WeaponData = [=[WeaponData
 {

@@ -11,7 +11,6 @@ SWEP.Spawnable = true
 SWEP.HoldType = "shotgun"
 SWEP.WorldModel = "models/weapons/w_shot_xm1014.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_shot_xm1014.mdl"
-SWEP.IconOverride = "vgui/gfx/vgui/fav_weap/xm1014"
 
 SWEP.WeaponData = [=[WeaponData
 {

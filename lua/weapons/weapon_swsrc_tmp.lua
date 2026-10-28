@@ -11,7 +11,6 @@ SWEP.Spawnable = true
 SWEP.HoldType = "smg"
 SWEP.WorldModel = "models/weapons/w_smg_tmp.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_smg_tmp.mdl"
-SWEP.IconOverride = "vgui/gfx/vgui/fav_weap/tmp"
 
 SWEP.WeaponData = [=[WeaponData
 {

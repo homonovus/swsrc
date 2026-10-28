@@ -11,7 +11,6 @@ SWEP.Spawnable = true
 SWEP.HoldType = "revolver"
 SWEP.WorldModel = "models/weapons/w_pist_usp.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_pist_usp.mdl"
-SWEP.IconOverride = "vgui/gfx/vgui/fav_weap/usp45"
 
 local g_SilencedTranslations = {
 	[ACT_VM_RELOAD] = ACT_VM_RELOAD_SILENCED,

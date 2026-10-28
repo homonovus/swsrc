@@ -11,7 +11,6 @@ SWEP.Spawnable = true
 SWEP.HoldType = "duel"
 SWEP.WorldModel = "models/weapons/w_pist_elite.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_pist_elite.mdl"
-SWEP.IconOverride = "vgui/gfx/vgui/fav_weap/elites"
 
 SWEP.WeaponData = [=[WeaponData
 {

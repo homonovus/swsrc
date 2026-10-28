@@ -11,7 +11,6 @@ SWEP.Spawnable = true
 SWEP.HoldType = "shotgun"
 SWEP.WorldModel = "models/weapons/w_shot_m3super90.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_shot_m3super90.mdl"
-SWEP.IconOverride = "vgui/gfx/vgui/fav_weap/m3"
 
 SWEP.WeaponData = [=[WeaponData
 {

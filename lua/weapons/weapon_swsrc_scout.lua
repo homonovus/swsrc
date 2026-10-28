@@ -11,7 +11,6 @@ SWEP.Spawnable = true
 SWEP.HoldType = "ar2"
 SWEP.WorldModel = "models/weapons/w_snip_scout.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_snip_scout.mdl"
-SWEP.IconOverride = "vgui/gfx/vgui/fav_weap/scout"
 
 SWEP.WeaponData = [=[WeaponData
 {

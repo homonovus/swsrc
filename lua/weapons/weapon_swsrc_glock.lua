@@ -11,7 +11,6 @@ SWEP.Spawnable = true
 SWEP.HoldType = "revolver"
 SWEP.WorldModel = "models/weapons/w_pist_glock18.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_pist_glock18.mdl"
-SWEP.IconOverride = "vgui/gfx/vgui/fav_weap/glock18"
 
 SWEP.WeaponData = [=[WeaponData
 {

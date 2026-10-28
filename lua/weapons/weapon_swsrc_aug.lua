@@ -11,7 +11,6 @@ SWEP.Spawnable = true
 SWEP.HoldType = "ar2"
 SWEP.WorldModel = "models/weapons/w_rif_aug.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_rif_aug.mdl"
-SWEP.IconOverride = "vgui/gfx/vgui/fav_weap/aug"
 
 SWEP.WeaponData = [=[WeaponData
 {
