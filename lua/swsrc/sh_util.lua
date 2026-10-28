@@ -141,6 +141,25 @@ local pWeaponSoundCategories = {
 	"deploy",
 }
 
+-- stupid hack because the ammo system SUCKS and doesn't allow overwriting values
+local MAX_AMMO_BY_NAME = {
+	BULLET_PLAYER_50AE = 35,
+	BULLET_PLAYER_762MM = 90,
+	BULLET_PLAYER_556MM = 90,
+	BULLET_PLAYER_556MM_BOX = 200,
+	BULLET_PLAYER_338MAG = 30,
+	BULLET_PLAYER_9MM = 120,
+	BULLET_PLAYER_BUCKSHOT = 32,
+	BULLET_PLAYER_45ACP = 100,
+	BULLET_PLAYER_357SIG = 52,
+	BULLET_PLAYER_57MM = 100,
+
+	-- these should work since theyre unique but you never know
+	swsrc_hegrenade = 1,
+	swsrc_flashbang = 2,
+	swsrc_smokegrenade = 1,
+}
+
 function swsrc.WeaponClassFromString(weaponType)
 	for _, info in ipairs(s_weaponTypeInfo) do
 		if info[2] == weaponType then
@@ -335,7 +354,17 @@ function swsrc.RegisterWeapon(WeaponData, SWEP)
 	if data.iMaxClip1 == -1 then
 		SWEP.Primary.DefaultClip = -1
 	else
-		SWEP.Primary.DefaultClip = data.iDefaultClip1
+		local clip = data.iDefaultClip1
+		if not clip or clip == 0 then
+			clip = data.iMaxClip1
+		end
+
+		local extra = game.GetAmmoMax(data.iAmmoType)
+		if not extra or extra == 0 or extra == 9999 then
+			extra = MAX_AMMO_BY_NAME[data.szAmmo1] or clip * 3
+		end
+
+		SWEP.Primary.DefaultClip = clip + extra
 	end
 	SWEP.Primary.Automatic = data.m_bFullAuto
 
@@ -344,9 +373,26 @@ function swsrc.RegisterWeapon(WeaponData, SWEP)
 	if data.iMaxClip2 == -1 then
 		SWEP.Secondary.DefaultClip = -1
 	else
-		SWEP.Secondary.DefaultClip = data.iDefaultClip2
+		local clip = data.iDefaultClip2
+		if not clip or clip == 0 then
+			clip = data.iMaxClip2
+		end
+
+		local extra = game.GetAmmoMax(data.iAmmo2Type)
+		if not extra or extra == 0 or extra == 9999 then
+			extra = MAX_AMMO_BY_NAME[data.szAmmo2] or clip * 3
+		end
+
+		SWEP.Secondary.DefaultClip = clip + game.GetAmmoMax(data.iAmmo2Type)
 	end
 	SWEP.Secondary.Automatic = data.m_bFullAuto
+
+	if data.m_iMuzzleFlashStyle > -1 then
+		SWEP.CSMuzzleFlashes = true
+		if data.m_iMuzzleFlashStyle == 1 then
+			SWEP.CSMuzzleX = true
+		end
+	end
 
 	-- let weapons override if desired
 	if SWEP.OverrideData then
