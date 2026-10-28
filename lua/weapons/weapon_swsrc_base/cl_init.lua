@@ -445,7 +445,7 @@ do -- weapon selection
 	end
 
 	local font_CSweapons = {
-		font = system.IsLinux() and "cs.ttf" or "cs",
+		font = system.IsLinux() and "csqol.ttf" or "csqol",
 		size = ScreenScaleHClamped(70),
 		weight = 0,
 		additive = true,

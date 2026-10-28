@@ -52,7 +52,7 @@ if CLIENT then
 	list.Set("ContentCategoryIcons", language.GetPhrase("#spawnmenu.category.swsrc"), "games/16/cstrike.png")
 
 	surface.CreateFont("CSTypeDeath", {
-		font = system.IsLinux() and "csd.ttf" or "csd",
+		font = system.IsLinux() and "csdqol.ttf" or "csdqol",
 		size = 64,
 		additive = true,
 	})

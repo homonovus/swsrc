@@ -11,7 +11,6 @@ SWEP.Spawnable = true
 SWEP.HoldType = "shotgun"
 SWEP.WorldModel = "models/weapons/w_mach_m249para.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_mach_m249para.mdl"
-SWEP.IconOverride = "vgui/gfx/vgui/fav_weap/m249"
 
 SWEP.WeaponData = [=[WeaponData
 {
@@ -164,7 +163,10 @@ function SWEP:SetupWeaponHoldTypeForAI(t)
 end
 
 local weapon_accuracy_model = GetConVar("swsrc_weapon_accuracy_model")
+local weapon_accuracy_noinaccuracy = GetConVar("swsrc_weapon_accuracy_noinaccuracy")
 function SWEP:GetInaccuracy()
+	if weapon_accuracy_noinaccuracy:GetBool() then return 0 end
+
 	local selfTable = self:GetTable()
 
 	if weapon_accuracy_model:GetInt() == 1 then
